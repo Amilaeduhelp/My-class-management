@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>පන්ති කළමනාකරණ පද්ධතිය</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .current-date {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .nav-tab {
+            flex: 1;
+            min-width: 80px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            font-size: 1em;
+            font-weight: 600;
+            color: #495057;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        
+        .nav-tab:hover {
+            background: #e9ecef;
+        }
+        
+        .nav-tab.active {
+            background: white;
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .class-list, .student-list, .assignment-list, .report-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .class-card, .student-card, .assignment-card, .report-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s;
+        }
+        
+        .class-card:hover, .student-card:hover, .assignment-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .card-title {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .card-info {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+        
+        .export-section {
+            background: #e7f3ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #17a2b8;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 2000;
+            max-width: 350px;
+            animation: slideIn 0.5s;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .notification-title {
+            font-weight: 700;
+            color: #667eea;
+            font-size: 1.1em;
+        }
+        
+        .notification-close {
+            cursor: pointer;
+            font-size: 20px;
+            color: #999;
+        }
+        
+        .notification-body {
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .notification-actions {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .report-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+            font-size: 1.2em;
+        }
+        
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .header {
+                padding: 20px 15px;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .current-date {
+                font-size: 1em;
+            }
+            
+            .nav-tab {
+                font-size: 0.9em;
+                padding: 12px 8px;
+                min-width: 70px;
+            }
+            
+            .content {
+                padding: 15px;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.9em;
+                margin-right: 5px;
+                width: 100%;
+                margin-right: 0;
+            }
+            
+            .class-list, .student-list, .assignment-list, .report-list {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .notification {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
+                padding: 15px;
+            }
+            
+            .notification-actions {
+                flex-direction: column;
+            }
+            
+            .export-section {
+                padding: 15px;
+            }
+            
+            .card-title {
+                font-size: 1.1em;
+            }
+            
+            h2 {
+                font-size: 1.3em;
+            }
+            
+            h3 {
+                font-size: 1.1em;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.5em;
+            }
+            
+            .current-date {
+                font-size: 0.9em;
+            }
+            
+            .nav-tab {
+                font-size: 0.8em;
+                padding: 10px 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>පන්ති කළමනාකරණ පද්ධතිය</h1>
+            <div class="current-date" id="currentDate"></div>
+        </div>
+        
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('classes')">පන්ති</button>
+            <button class="nav-tab" onclick="showTab('students')">සිසුන්</button>
+            <button class="nav-tab" onclick="showTab('assignments')">නිබන්ධන</button>
+            <button class="nav-tab" onclick="showTab('daily')">දෛනික වාර්තාව</button>
+            <button class="nav-tab" onclick="showTab('reports')">වාර්තා</button>
+        </div>
+        
+        <div class="content">
+            <div id="classes" class="tab-content active">
+                <h2>නව පන්තියක් එකතු කරන්න</h2>
+                <div class="form-group">
+                    <label>පන්ති නම</label>
+                    <input type="text" id="className" placeholder="උදා: Grade 10 A">
+                </div>
+                <div class="form-group">
+                    <label>ගුරුවරයා</label>
+                    <input type="text" id="classTeacher" placeholder="ගුරුවරයාගේ නම">
+                </div>
+                <button class="btn btn-primary" onclick="addClass()">පන්තිය එකතු කරන්න</button>
+                
+                <h2 style="margin-top: 30px;">පවතින පන්ති</h2>
+                <div class="class-list" id="classList"></div>
+            </div>
+            
+            <div id="students" class="tab-content">
+                <h2>සිසුන් කළමනාකරණය</h2>
+                <div class="form-group">
+                    <label>පන්තිය තෝරන්න</label>
+                    <select id="studentClassSelect" onchange="loadStudents()"></select>
+                </div>
+                
+                <div id="studentForm" style="display: none;">
+                    <h3 style="margin-top: 20px;">නව සිසුවෙකු එකතු කරන්න</h3>
+                    <div class="form-group">
+                        <label>සිසුවාගේ නම</label>
+                        <input type="text" id="studentName" placeholder="සම්පූර්ණ නම">
+                    </div>
+                    <div class="form-group">
+                        <label>දුරකථන අංකය</label>
+                        <input type="tel" id="studentPhone" placeholder="0771234567">
+                    </div>
+                    <button class="btn btn-primary" onclick="addStudent()">සිසුවා එකතු කරන්න</button>
+                    
+                    <h3 style="margin-top: 30px;">සිසුන් ලැයිස්තුව</h3>
+                    <div id="studentCount" style="margin: 10px 0; color: #666;"></div>
+                    <div class="student-list" id="studentList"></div>
+                </div>
+            </div>
+            
+            <div id="assignments" class="tab-content">
+                <h2>නිබන්ධන කළමනාකරණය</h2>
+                <div class="form-group">
+                    <label>පන්තිය තෝරන්න</label>
+                    <select id="assignmentClassSelect"></select>
+                </div>
+                <div class="form-group">
+                    <label>නිබන්ධන මාතෘකාව</label>
+                    <input type="text" id="assignmentTitle" placeholder="උදා: ගණිත රේඛා ගැන පර්යේෂණයක්">
+                </div>
+                <div class="form-group">
+                    <label>විස්තරය</label>
+                    <textarea id="assignmentDesc" rows="3" placeholder="නිබන්ධන විස්තර"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>නියම දිනය</label>
+                    <input type="date" id="assignmentDue">
+                </div>
+                <button class="btn btn-primary" onclick="addAssignment()">නිබන්ධනය එකතු කරන්න</button>
+                
+                <h2 style="margin-top: 30px;">පවතින නිබන්ධන</h2>
+                <div class="assignment-list" id="assignmentList"></div>
+            </div>
+            
+            <div id="daily" class="tab-content">
+                <h2>දෛනික වාර්තාව</h2>
+                <div class="form-group">
+                    <label>පන්තිය තෝරන්න</label>
+                    <select id="dailyClassSelect"></select>
+                </div>
+                <div class="form-group">
+                    <label>විෂයය</label>
+                    <input type="text" id="dailySubject" placeholder="උදා: ගණිතය">
+                </div>
+                <div class="form-group">
+                    <label>ඉගැන්වූ පාඩම</label>
+                    <textarea id="dailyLesson" rows="3" placeholder="අද ඉගැන්වූ පාඩම් විස්තර"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>සටහන්</label>
+                    <textarea id="dailyNotes" rows="2" placeholder="විශේෂ සටහන්"></textarea>
+                </div>
+                <button class="btn btn-primary" onclick="addDailyReport()">වාර්තාව සුරකින්න</button>
+                
+                <h2 style="margin-top: 30px;">අද වාර්තා</h2>
+                <div class="report-list" id="dailyReportList"></div>
+            </div>
+            
+            <div id="reports" class="tab-content">
+                <h2>වාර්තා සහ විශ්ලේෂණය</h2>
+                
+                <div class="export-section">
+                    <h3>📊 Excel Export</h3>
+                    <p>සියලු දත්ත Excel ගොනුවකට export කරන්න</p>
+                    <button class="btn btn-success" onclick="exportToExcel()">📥 සියලු දත්ත Export කරන්න</button>
+                    <button class="btn btn-info" onclick="exportClassReport()">📄 පන්ති වාර්තාව Export කරන්න</button>
+                    <button class="btn btn-info" onclick="exportDailyReports()">📅 දෛනික වාර්තා Export කරන්න</button>
+                </div>
+                
+                <div class="report-section">
+                    <h3>සමස්ත විශ්ලේෂණය</h3>
+                    <p><strong>මුළු පන්ති ගණන:</strong> <span id="totalClasses">0</span></p>
+                    <p><strong>මුළු සිසුන් ගණන:</strong> <span id="totalStudents">0</span></p>
+                    <p><strong>මුළු නිබන්ධන ගණන:</strong> <span id="totalAssignments">0</span></p>
+                </div>
+                
+                <div class="form-group">
+                    <label>පන්තිය අනුව වාර්තාව</label>
+                    <select id="reportClassSelect" onchange="generateClassReport()"></select>
+                </div>
+                
+                <div id="classReportDetails"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="notificationContainer"></div>
+
+    <script>
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://uqgzlaxsnknheoerbfus.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxZ3psYXhzbmtuaGVvZXJiZnVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5MjM2MTUsImV4cCI6MjA3OTI4MzYxNX0.IYWZ7ukx8J-GJMWy7cMk2BWnmzJmJjjE93yEmJie7nQ';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        // දත්ත ගබඩාව
+        let classes = [];
+        let students = {};
+        let assignments = [];
+        let dailyReports = [];
+        
+        // Database සිට දත්ත load කිරීම
+        async function loadDataFromDB() {
+            try {
+                const { data, error } = await supabase
+                    .from('class')
+                    .select('*')
+                    .order('id', { ascending: true });
+                
+                if (error) throw error;
+                
+                if (data && data.length > 0) {
+                    classes = data.map(row => ({
+                        id: row.id,
+                        name: row.class_name,
+                        teacher: row.teacher || 'නොදන්නා',
+                        createdAt: row.created_at || new Date().toISOString()
+                    }));
+                    
+                    students = {};
+                    assignments = [];
+                    dailyReports = [];
+                    
+                    data.forEach(row => {
+                        if (row.student) {
+                            const studentData = typeof row.student === 'string' ? JSON.parse(row.student) : row.student;
+                            students[row.id] = Array.isArray(studentData) ? studentData : [];
+                        }
+                        
+                        if (row.tutes) {
+                            const tutesData = typeof row.tutes === 'string' ? JSON.parse(row.tutes) : row.tutes;
+                            if (Array.isArray(tutesData)) {
+                                assignments = [...assignments, ...tutesData];
+                            }
+                        }
+                        
+                        if (row.d_report) {
+                            const reportData = typeof row.d_report === 'string' ? JSON.parse(row.d_report) : row.d_report;
+                            if (Array.isArray(reportData)) {
+                                dailyReports = [...dailyReports, ...reportData];
+                            }
+                        }
+                    });
+                    
+                    localStorage.setItem('classes', JSON.stringify(classes));
+                    localStorage.setItem('students', JSON.stringify(students));
+                    localStorage.setItem('assignments', JSON.stringify(assignments));
+                    localStorage.setItem('dailyReports', JSON.stringify(dailyReports));
+                    
+                    loadClasses();
+                    showNotification('සාර්ථකයි', 'Database සිට දත්ත load කර ගන්නා ලදී!');
+                } else {
+                    loadClasses();
+                }
+            } catch (error) {
+                console.error('Database load error:', error);
+                classes = JSON.parse(localStorage.getItem('classes')) || [];
+                students = JSON.parse(localStorage.getItem('students')) || {};
+                assignments = JSON.parse(localStorage.getItem('assignments')) || [];
+                dailyReports = JSON.parse(localStorage.getItem('dailyReports')) || [];
+                loadClasses();
+                showNotification('දෝෂයක්', 'Database සම්බන්ධතාවක් නැත. Local දත්ත භාවිතා වේ.');
+            }
+        }
+        
+        // Database වලට පන්තියක් save කිරීම
+        async function saveClassToDB(classData) {
+            const { data, error } = await supabase
+                .from('class')
+                .insert([{
+                    class_name: classData.name,
+                    teacher: classData.teacher,
+                    student: JSON.stringify([]),
+                    tutes: JSON.stringify([]),
+                    d_report: JSON.stringify([]),
+                    m_report: JSON.stringify([])
+                }])
+                .select();
+            
+            if (error) throw error;
+            return data[0];
+        }
+        
+        // Database වල පන්තිය update කිරීම
+        async function updateClassInDB(classId, field, value) {
+            const updateData = {};
+            updateData[field] = JSON.stringify(value);
+            
+            const { error } = await supabase
+                .from('class')
+                .update(updateData)
+                .eq('id', classId);
+            
+            if (error) throw error;
+        }
+        
+        // Database සිට පන්තිය delete කිරීම
+        async function deleteClassFromDB(classId) {
+            const { error } = await supabase
+                .from('class')
+                .delete()
+                .eq('id', classId);
+            
+            if (error) throw error;
+        }
+        
+        // Notification පද්ධතිය
+        function showNotification(title, message, actions = []) {
+            const container = document.getElementById('notificationContainer');
+            const notifId = 'notif_' + Date.now();
+            
+            const actionsHtml = actions.map(action => 
+                `<button class="btn btn-${action.type}" onclick="${action.onclick}; closeNotification('${notifId}')">${action.text}</button>`
+            ).join('');
+            
+            const notifHtml = `
+                <div id="${notifId}" class="notification">
+                    <div class="notification-header">
+                        <div class="notification-title">🔔 ${title}</div>
+                        <div class="notification-close" onclick="closeNotification('${notifId}')">×</div>
+                    </div>
+                    <div class="notification-body">${message}</div>
+                    ${actionsHtml ? `<div class="notification-actions">${actionsHtml}</div>` : ''}
+                </div>
+            `;
+            
+            container.innerHTML += notifHtml;
+            
+            if (actions.length === 0) {
+                setTimeout(() => closeNotification(notifId), 10000);
+            }
+        }
+        
+        function closeNotification(id) {
+            const notif = document.getElementById(id);
+            if (notif) {
+                notif.style.animation = 'slideIn 0.3s reverse';
+                setTimeout(() => notif.remove(), 300);
+            }
+        }
+        
+        // දෛනික Reminders
+        function checkDailyReminders() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const today = now.toISOString().split('T')[0];
+            
+            const lastReminder = localStorage.getItem('lastDailyReminder');
+            
+            if (hours === 18 && minutes === 0 && lastReminder !== today + '_18') {
+                showNotification(
+                    'දෛනික වාර්තා සිහිකැඳවීම',
+                    'අද දින සඳහා දෛනික වාර්තාව ලිවීමට කාලයයි! ඔබගේ පන්ති වාර්තා යාවත්කාලීන කරන්න.',
+                    [
+                        { text: 'වාර්තාව ලියන්න', type: 'primary', onclick: "showTab('daily')" }
+                    ]
+                );
+                localStorage.setItem('lastDailyReminder', today + '_18');
+            }
+            
+            if (hours === 21 && minutes === 0 && lastReminder !== today + '_21') {
+                const todayReports = dailyReports.filter(r => r.date === today);
+                if (todayReports.length === 0) {
+                    showNotification(
+                        'දෛනික වාර්තා අවසන් සිහිකැඳවීම',
+                        'අද දින සඳහා තවමත් දෛනික වාර්තාවක් ලියා නොමැත. කරුණාකර වාර්තාව සම්පූර්ණ කරන්න.',
+                        [
+                            { text: 'දැන් ලියන්න', type: 'primary', onclick: "showTab('daily')" }
+                        ]
+                    );
+                }
+                localStorage.setItem('lastDailyReminder', today + '_21');
+            }
+        }
+        
+        // සතිපතා reminder
+        function checkWeeklyReminder() {
+            const now = new Date();
+            const dayOfWeek = now.getDay();
+            const lastWeeklyReminder = localStorage.getItem('lastWeeklyReminder');
+            const today = now.toISOString().split('T')[0];
+            
+            if (dayOfWeek === 0 && now.getHours() === 10 && now.getMinutes() === 0 && lastWeeklyReminder !== today) {
+                const oldReportsCount = dailyReports.filter(r => {
+                    const reportDate = new Date(r.date);
+                    const weekAgo = new Date();
+                    weekAgo.setDate(weekAgo.getDate() - 7);
+                    return reportDate < weekAgo;
+                }).length;
+                
+                if (oldReportsCount > 0) {
+                    showNotification(
+                        'සතිපතා දත්ත කළමනාකරණය',
+                        `ඔබ සතියකට පෙර වාර්තා ${oldReportsCount}ක් ඇත. පැරණි දත්ත මකා Excel export කරන්න නිර්දේශ කෙරේ.`,
+                        [
+                            { text: 'වාර්තා Export කරන්න', type: 'success', onclick: "exportDailyReports()" },
+                            { text: 'පැරණි වාර්තා මකන්න', type: 'danger', onclick: "deleteOldReports()" }
+                        ]
+                    );
+                }
+                localStorage.setItem('lastWeeklyReminder', today);
+            }
+        }
+        
+        // පැරණි වාර්තා මකා දැමීම
+        function deleteOldReports() {
+            const weekAgo = new Date();
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            
+            const oldCount = dailyReports.length;
+            dailyReports = dailyReports.filter(r => {
+                const reportDate = new Date(r.date);
+                return reportDate >= weekAgo;
+            });
+            
+            const deletedCount = oldCount - dailyReports.length;
+            localStorage.setItem('dailyReports', JSON.stringify(dailyReports));
+            
+            alert(`සතියකට වඩා පැරණි වාර්තා ${deletedCount}ක් මකා දමන ලදී.`);
+            loadTodayReports();
+        }
+        
+        setInterval(() => {
+            checkDailyReminders();
+            checkWeeklyReminder();
+        }, 60000);
+        
+        setTimeout(() => {
+            checkDailyReminders();
+            checkWeeklyReminder();
+        }, 5000);
+        
+        // දිනය යාවත්කාලීන කිරීම
+        function updateDate() {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const date = new Date().toLocaleDateString('si-LK', options);
+            document.getElementById('currentDate').textContent = date;
+        }
+        
+        // Tab මාරු කිරීම
+        function showTab(tabName) {
+            const tabs = document.querySelectorAll('.tab-content');
+            const navTabs = document.querySelectorAll('.nav-tab');
+            
+            tabs.forEach(tab => tab.classList.remove('active'));
+            navTabs.forEach(nav => nav.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            
+            navTabs.forEach(nav => {
+                if (nav.textContent.includes(tabName === 'classes' ? 'පන්ති' : 
+                   tabName === 'students' ? 'සිසුන්' :
+                   tabName === 'assignments' ? 'නිබන්ධන' :
+                   tabName === 'daily' ? 'දෛනික' : 'වාර්තා')) {
+                    nav.classList.add('active');
+                }
+            });
+            
+            if (tabName === 'students') {
+                updateStudentClassSelect();
+            } else if (tabName === 'assignments') {
+                updateAssignmentClassSelect();
+            } else if (tabName === 'daily') {
+                updateDailyClassSelect();
+                loadTodayReports();
+            } else if (tabName === 'reports') {
+                updateReportClassSelect();
+                updateOverallStats();
+            }
+        }
+        
+        // පන්ති එකතු කිරීම
+        async function addClass() {
+            const name = document.getElementById('className').value.trim();
+            const teacher = document.getElementById('classTeacher').value.trim();
+            
+            if (!name) {
+                alert('පන්ති නම ඇතුළත් කරන්න');
+                return;
+            }
+            
+            if (classes.length >= 30) {
+                alert('පන්ති 30ක් දැනටමත් එකතු කර ඇත');
+                return;
+            }
+            
+            try {
+                const newClass = {
+                    name: name,
+                    teacher: teacher || 'නොදන්නා',
+                    createdAt: new Date().toISOString()
+                };
+                
+                const savedClass = await saveClassToDB(newClass);
+                
+                newClass.id = savedClass.id;
+                classes.push(newClass);
+                students[savedClass.id] = [];
+                
+                localStorage.setItem('classes', JSON.stringify(classes));
+                localStorage.setItem('students', JSON.stringify(students));
+                
+                document.getElementById('className').value = '';
+                document.getElementById('classTeacher').value = '';
+                
+                loadClasses();
+                showNotification('සාර්ථකයි', 'පන්තිය database එකට save කරන ලදී!');
+            } catch (error) {
+                alert('Database error: ' + error.message);
+            }
+        }
+        
+        // පන්ති පූරණය කිරීම
+        function loadClasses() {
+            const container = document.getElementById('classList');
+            container.innerHTML = '';
+            
+            classes.forEach(cls => {
+                const studentCount = students[cls.id] ? students[cls.id].length : 0;
+                const div = document.createElement('div');
+                div.className = 'class-card';
+                div.innerHTML = `
+                    <div class="card-title">${cls.name}</div>
+                    <div class="card-info">ගුරුවරයා: ${cls.teacher}</div>
+                    <div class="card-info">සිසුන්: ${studentCount}/50</div>
+                    <button class="delete-btn" onclick="deleteClass(${cls.id})">මකන්න</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+        
+        // පන්තිය මකා දැමීම
+        async function deleteClass(id) {
+            if (confirm('ඔබට මෙම පන්තිය මකා දැමීමට අවශ්‍ය ද?')) {
+                try {
+                    await deleteClassFromDB(id);
+                    
+                    classes = classes.filter(c => c.id !== id);
+                    delete students[id];
+                    
+                    localStorage.setItem('classes', JSON.stringify(classes));
+                    localStorage.setItem('students', JSON.stringify(students));
+                    
+                    loadClasses();
+                    showNotification('සාර්ථකයි', 'පන්තිය database එකෙන් මකා දමන ලදී!');
+                } catch (error) {
+                    alert('Database error: ' + error.message);
+                }
+            }
+        }
+        
+        // සිසුන් පන්ති select යාවත්කාලීන කිරීම
+        function updateStudentClassSelect() {
+            const select = document.getElementById('studentClassSelect');
+            select.innerHTML = '<option value="">පන්තියක් තෝරන්න</option>';
+            
+            classes.forEach(cls => {
+                const option = document.createElement('option');
+                option.value = cls.id;
+                option.textContent = cls.name;
+                select.appendChild(option);
+            });
+        }
+        
+        // සිසුන් පූරණය කිරීම
+        function loadStudents() {
+            const classId = document.getElementById('studentClassSelect').value;
+            const form = document.getElementById('studentForm');
+            const container = document.getElementById('studentList');
+            const countDiv = document.getElementById('studentCount');
+            
+            if (!classId) {
+                form.style.display = 'none';
+                return;
+            }
+            
+            form.style.display = 'block';
+            container.innerHTML = '';
+            
+            const classStudents = students[classId] || [];
+            countDiv.textContent = `සිසුන් ගණන: ${classStudents.length}/50`;
+            
+            classStudents.forEach((student, index) => {
+                const div = document.createElement('div');
+                div.className = 'student-card';
+                div.innerHTML = `
+                    <div class="card-title">${student.name}</div>
+                    <div class="card-info">දුරකථනය: ${student.phone}</div>
+                    <button class="delete-btn" onclick="deleteStudent(${classId}, ${index})">මකන්න</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+        
+        // සිසුවෙකු එකතු කිරීම
+        async function addStudent() {
+            const classId = document.getElementById('studentClassSelect').value;
+            const name = document.getElementById('studentName').value.trim();
+            const phone = document.getElementById('studentPhone').value.trim();
+            
+            if (!classId) {
+                alert('පන්තියක් තෝරන්න');
+                return;
+            }
+            
+            if (!name || !phone) {
+                alert('සියලු තොරතුරු ඇතුළත් කරන්න');
+                return;
+            }
+            
+            if (!students[classId]) {
+                students[classId] = [];
+            }
+            
+            if (students[classId].length >= 50) {
+                alert('මෙම පන්තියට සිසුන් 50ක් දැනටමත් එකතු කර ඇත');
+                return;
+            }
+            
+            try {
+                students[classId].push({
+                    name: name,
+                    phone: phone,
+                    addedAt: new Date().toISOString()
+                });
+                
+                await updateClassInDB(classId, 'student', students[classId]);
+                
+                localStorage.setItem('students', JSON.stringify(students));
+                
+                document.getElementById('studentName').value = '';
+                document.getElementById('studentPhone').value = '';
+                
+                loadStudents();
+                loadClasses();
+                showNotification('සාර්ථකයි', 'සිසුවා database එකට save කරන ලදී!');
+            } catch (error) {
+                alert('Database error: ' + error.message);
+            }
+        }
+        
+        // සිසුවෙකු මකා දැමීම
+        async function deleteStudent(classId, index) {
+            if (confirm('ඔබට මෙම සිසුවා මකා දැමීමට අවශ්‍ය ද?')) {
+                try {
+                    students[classId].splice(index, 1);
+                    
+                    await updateClassInDB(classId, 'student', students[classId]);
+                    
+                    localStorage.setItem('students', JSON.stringify(students));
+                    loadStudents();
+                    loadClasses();
+                    showNotification('සාර්ථකයි', 'සිසුවා database එකෙන් මකා දමන ලදී!');
+                } catch (error) {
+                    alert('Database error: ' + error.message);
+                }
+            }
+        }
+        
+        // නිබන්ධන select යාවත්කාලීන කිරීම
+        function updateAssignmentClassSelect() {
+            const select = document.getElementById('assignmentClassSelect');
+            select.innerHTML = '<option value="">පන්තියක් තෝරන්න</option>';
+            
+            classes.forEach(cls => {
+                const option = document.createElement('option');
+                option.value = cls.id;
+                option.textContent = cls.name;
+                select.appendChild(option);
+            });
+            
+            loadAssignments();
+        }
+        
+        // නිබන්ධනයක් එකතු කිරීම
+        async function addAssignment() {
+            const classId = document.getElementById('assignmentClassSelect').value;
+            const title = document.getElementById('assignmentTitle').value.trim();
+            const desc = document.getElementById('assignmentDesc').value.trim();
+            const due = document.getElementById('assignmentDue').value;
+            
+            if (!classId || !title || !due) {
+                alert('සියලු අවශ්‍ය තොරතුරු ඇතුළත් කරන්න');
+                return;
+            }
+            
+            try {
+                const assignment = {
+                    id: Date.now(),
+                    classId: parseInt(classId),
+                    title: title,
+                    description: desc,
+                    dueDate: due,
+                    createdAt: new Date().toISOString()
+                };
+                
+                assignments.push(assignment);
+                
+                const classAssignments = assignments.filter(a => a.classId === parseInt(classId));
+                await updateClassInDB(classId, 'tutes', classAssignments);
+                
+                localStorage.setItem('assignments', JSON.stringify(assignments));
+                
+                document.getElementById('assignmentTitle').value = '';
+                document.getElementById('assignmentDesc').value = '';
+                document.getElementById('assignmentDue').value = '';
+                
+                loadAssignments();
+                showNotification('සාර්ථකයි', 'නිබන්ධනය database එකට save කරන ලදී!');
+            } catch (error) {
+                alert('Database error: ' + error.message);
+            }
+        }
+        
+        // නිබන්ධන පූරණය කිරීම
+        function loadAssignments() {
+            const container = document.getElementById('assignmentList');
+            container.innerHTML = '';
+            
+            assignments.forEach(assign => {
+                const cls = classes.find(c => c.id === assign.classId);
+                if (!cls) return;
+                
+                const div = document.createElement('div');
+                div.className = 'assignment-card';
+                div.innerHTML = `
+                    <div class="card-title">${assign.title}</div>
+                    <div class="card-info">පන්තිය: ${cls.name}</div>
+                    <div class="card-info">නියම දිනය: ${assign.dueDate}</div>
+                    <div class="card-info">${assign.description || ''}</div>
+                    <button class="delete-btn" onclick="deleteAssignment(${assign.id})">මකන්න</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+        
+        // නිබන්ධනයක් මකා දැමීම
+        async function deleteAssignment(id) {
+            if (confirm('ඔබට මෙම නිබන්ධනය මකා දැමීමට අවශ්‍ය ද?')) {
+                try {
+                    const assignment = assignments.find(a => a.id === id);
+                    if (!assignment) return;
+                    
+                    assignments = assignments.filter(a => a.id !== id);
+                    
+                    const classAssignments = assignments.filter(a => a.classId === assignment.classId);
+                    await updateClassInDB(assignment.classId, 'tutes', classAssignments);
+                    
+                    localStorage.setItem('assignments', JSON.stringify(assignments));
+                    loadAssignments();
+                    showNotification('සාර්ථකයි', 'නිබන්ධනය database එකෙන් මකා දමන ලදී!');
+                } catch (error) {
+                    alert('Database error: ' + error.message);
+                }
+            }
+        }
+        
+        // දෛනික වාර්තා select යාවත්කාලීන කිරීම
+        function updateDailyClassSelect() {
+            const select = document.getElementById('dailyClassSelect');
+            select.innerHTML = '<option value="">පන්තියක් තෝරන්න</option>';
+            
+            classes.forEach(cls => {
+                const option = document.createElement('option');
+                option.value = cls.id;
+                option.textContent = cls.name;
+                select.appendChild(option);
+            });
+        }
+        
+        // දෛනික වාර්තාවක් එකතු කිරීම
+        async function addDailyReport() {
+            const classId = document.getElementById('dailyClassSelect').value;
+            const subject = document.getElementById('dailySubject').value.trim();
+            const lesson = document.getElementById('dailyLesson').value.trim();
+            const notes = document.getElementById('dailyNotes').value.trim();
+            
+            if (!classId || !subject || !lesson) {
+                alert('සියලු අවශ්‍ය තොරතුරු ඇතුළත් කරන්න');
+                return;
+            }
+            
+            try {
+                const report = {
+                    id: Date.now(),
+                    classId: parseInt(classId),
+                    subject: subject,
+                    lesson: lesson,
+                    notes: notes,
+                    date: new Date().toISOString().split('T')[0],
+                    createdAt: new Date().toISOString()
+                };
+                
+                dailyReports.push(report);
+                
+                const classReports = dailyReports.filter(r => r.classId === parseInt(classId));
+                await updateClassInDB(classId, 'd_report', classReports);
+                
+                localStorage.setItem('dailyReports', JSON.stringify(dailyReports));
+                
+                document.getElementById('dailySubject').value = '';
+                document.getElementById('dailyLesson').value = '';
+                document.getElementById('dailyNotes').value = '';
+                
+                loadTodayReports();
+                showNotification('සාර්ථකයි', 'දෛනික වාර්තාව database එකට save කරන ලදී!');
+            } catch (error) {
+                alert('Database error: ' + error.message);
+            }
+        }
+        
+        // අද වාර්තා පූරණය කිරීම
+        function loadTodayReports() {
+            const container = document.getElementById('dailyReportList');
+            const today = new Date().toISOString().split('T')[0];
+            container.innerHTML = '';
+            
+            const todayReports = dailyReports.filter(r => r.date === today);
+            
+            todayReports.forEach(report => {
+                const cls = classes.find(c => c.id === report.classId);
+                if (!cls) return;
+                
+                const div = document.createElement('div');
+                div.className = 'report-card';
+                div.innerHTML = `
+                    <div class="card-title">${cls.name} - ${report.subject}</div>
+                    <div class="card-info"><strong>පාඩම:</strong> ${report.lesson}</div>
+                    ${report.notes ? `<div class="card-info"><strong>සටහන්:</strong> ${report.notes}</div>` : ''}
+                    <button class="delete-btn" onclick="deleteDailyReport(${report.id})">මකන්න</button>
+                `;
+                container.appendChild(div);
+            });
+            
+            if (todayReports.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #666;">අද වාර්තා නැත</p>';
+            }
+        }
+        
+        // දෛනික වාර්තාවක් මකා දැමීම
+        async function deleteDailyReport(id) {
+            if (confirm('ඔබට මෙම වාර්තාව මකා දැමීමට අවශ්‍ය ද?')) {
+                try {
+                    const report = dailyReports.find(r => r.id === id);
+                    if (!report) return;
+                    
+                    dailyReports = dailyReports.filter(r => r.id !== id);
+                    
+                    const classReports = dailyReports.filter(r => r.classId === report.classId);
+                    await updateClassInDB(report.classId, 'd_report', classReports);
+                    
+                    localStorage.setItem('dailyReports', JSON.stringify(dailyReports));
+                    loadTodayReports();
+                    showNotification('සාර්ථකයි', 'වාර්තාව database එකෙන් මකා දමන ලදී!');
+                } catch (error) {
+                    alert('Database error: ' + error.message);
+                }
+            }
+        }
+        
+        // වාර්තා යාවත්කාලීන කිරීම
+        function updateReportClassSelect() {
+            const select = document.getElementById('reportClassSelect');
+            select.innerHTML = '<option value="">සියල්ල</option>';
+            
+            classes.forEach(cls => {
+                const option = document.createElement('option');
+                option.value = cls.id;
+                option.textContent = cls.name;
+                select.appendChild(option);
+            });
+        }
+        
+        function updateOverallStats() {
+            document.getElementById('totalClasses').textContent = classes.length;
+            
+            let totalStudentCount = 0;
+            Object.values(students).forEach(classStudents => {
+                totalStudentCount += classStudents.length;
+            });
+            document.getElementById('totalStudents').textContent = totalStudentCount;
+            document.getElementById('totalAssignments').textContent = assignments.length;
+        }
+        
+        function generateClassReport() {
+            const classId = document.getElementById('reportClassSelect').value;
+            const container = document.getElementById('classReportDetails');
+            
+            if (!classId) {
+                container.innerHTML = '';
+                return;
+            }
+            
+            const cls = classes.find(c => c.id === parseInt(classId));
+            const classStudents = students[classId] || [];
+            const classAssignments = assignments.filter(a => a.classId === parseInt(classId));
+            const classReports = dailyReports.filter(r => r.classId === parseInt(classId));
+            
+            container.innerHTML = `
+                <div class="report-section">
+                    <h3>${cls.name} - සවිස්තරාත්මක වාර්තාව</h3>
+                    <p><strong>ගුරුවරයා:</strong> ${cls.teacher}</p>
+                    <p><strong>සිසුන් ගණන:</strong> ${classStudents.length}</p>
+                    <p><strong>නිබන්ධන ගණන:</strong> ${classAssignments.length}</p>
+                    <p><strong>දෛනික වාර්තා ගණන:</strong> ${classReports.length}</p>
+                </div>
+            `;
+        }
+        
+        // Excel Export කාර්යයන්
+        function exportToExcel() {
+            let csv = '\ufeff';
+            
+            csv += 'පන්ති දත්ත\n';
+            csv += 'පන්ති නම,ගුරුවරයා,සිසුන් ගණන\n';
+            classes.forEach(cls => {
+                const studentCount = students[cls.id] ? students[cls.id].length : 0;
+                csv += `"${cls.name}","${cls.teacher}",${studentCount}\n`;
+            });
+            
+            csv += '\n\n';
+            
+            csv += 'සිසුන් දත්ත\n';
+            csv += 'පන්ති නම,සිසුවාගේ නම,දුරකථන අංකය\n';
+            classes.forEach(cls => {
+                const classStudents = students[cls.id] || [];
+                classStudents.forEach(student => {
+                    csv += `"${cls.name}","${student.name}","${student.phone}"\n`;
+                });
+            });
+            
+            csv += '\n\n';
+            
+            csv += 'නිබන්ධන දත්ත\n';
+            csv += 'පන්ති නම,මාතෘකාව,විස්තරය,නියම දිනය\n';
+            assignments.forEach(assign => {
+                const cls = classes.find(c => c.id === assign.classId);
+                if (cls) {
+                    csv += `"${cls.name}","${assign.title}","${assign.description}","${assign.dueDate}"\n`;
+                }
+            });
+            
+            downloadCSV(csv, 'පන්ති_කළමනාකරණ_සම්පූර්ණ_වාර්තාව.csv');
+        }
+        
+        function exportClassReport() {
+            let csv = '\ufeff';
+            
+            csv += 'පන්ති වාර්තාව\n';
+            csv += 'පන්ති නම,ගුරුවරයා,සිසුන් ගණන,නිබන්ධන ගණන,දෛනික වාර්තා ගණන\n';
+            
+            classes.forEach(cls => {
+                const studentCount = students[cls.id] ? students[cls.id].length : 0;
+                const assignmentCount = assignments.filter(a => a.classId === cls.id).length;
+                const reportCount = dailyReports.filter(r => r.classId === cls.id).length;
+                
+                csv += `"${cls.name}","${cls.teacher}",${studentCount},${assignmentCount},${reportCount}\n`;
+            });
+            
+            downloadCSV(csv, 'පන්ති_සාරාංශ_වාර්තාව.csv');
+        }
+        
+        function exportDailyReports() {
+            let csv = '\ufeff';
+            
+            csv += 'දෛනික වාර්තා\n';
+            csv += 'දිනය,පන්ති නම,විෂයය,පාඩම,සටහන්\n';
+            
+            dailyReports.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            dailyReports.forEach(report => {
+                const cls = classes.find(c => c.id === report.classId);
+                if (cls) {
+                    csv += `"${report.date}","${cls.name}","${report.subject}","${report.lesson}","${report.notes}"\n`;
+                }
+            });
+            
+            downloadCSV(csv, 'දෛනික_වාර්තා.csv');
+        }
+        
+        function downloadCSV(csv, filename) {
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showNotification('Export සාර්ථකයි', `${filename} ගොනුව download කරන ලදී!`);
+        }
+        
+        // Initialize
+        updateDate();
+        loadDataFromDB();
+        
+        setInterval(updateDate, 60000);
+    </script>
+</body>
+</html>
