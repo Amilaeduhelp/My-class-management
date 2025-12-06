@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="si">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>පන්ති කළමනාකරණ පද්ධතිය</title>
+    <title>Class Management System</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
@@ -196,6 +196,87 @@
             font-size: 0.9em;
         }
         
+        .edit-btn {
+            background: #ffc107;
+            color: #333;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            margin-right: 5px;
+            font-size: 0.9em;
+        }
+        
+        .whatsapp-btn {
+            background: #25D366;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            margin-right: 5px;
+            font-size: 0.9em;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 3000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s;
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideUp 0.3s;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-header h2 {
+            margin: 0;
+            color: #667eea;
+        }
+        
+        .close {
+            font-size: 28px;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: #000;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
         .export-section {
             background: #e7f3ff;
             padding: 20px;
@@ -334,6 +415,16 @@
             h3 {
                 font-size: 1.1em;
             }
+            
+            .modal-content {
+                width: 95%;
+                margin: 10% auto;
+                padding: 20px;
+            }
+            
+            .modal-actions {
+                flex-direction: column;
+            }
         }
         
         @media (max-width: 480px) {
@@ -355,128 +446,128 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>CMS-AMILA UDAWATTHA</h1>
+            <h1>Class Management System</h1>
             <div class="current-date" id="currentDate"></div>
         </div>
         
         <div class="nav-tabs">
-            <button class="nav-tab active" onclick="showTab('classes')">Class</button>
+            <button class="nav-tab active" onclick="showTab('classes')">Classes</button>
             <button class="nav-tab" onclick="showTab('students')">Students</button>
-            <button class="nav-tab" onclick="showTab('assignments')">Tutes</button>
+            <button class="nav-tab" onclick="showTab('assignments')">Assignments</button>
             <button class="nav-tab" onclick="showTab('daily')">DR</button>
-            <button class="nav-tab" onclick="showTab('reports')">MR</button>
+            <button class="nav-tab" onclick="showTab('reports')">FR</button>
         </div>
         
         <div class="content">
             <div id="classes" class="tab-content active">
-                <h2>නව පන්තියක් එකතු කරන්න</h2>
+                <h2>Add New Class</h2>
                 <div class="form-group">
-                    <label>පන්ති නම</label>
-                    <input type="text" id="className" placeholder="උදා: Grade 10 A">
+                    <label>Class Name</label>
+                    <input type="text" id="className" placeholder="e.g., Grade 10 A">
                 </div>
                 <div class="form-group">
-                    <label>ගුරුවරයා</label>
-                    <input type="text" id="classTeacher" placeholder="ගුරුවරයාගේ නම">
+                    <label>Teacher</label>
+                    <input type="text" id="classTeacher" placeholder="Teacher's Name">
                 </div>
-                <button class="btn btn-primary" onclick="addClass()">පන්තිය එකතු කරන්න</button>
+                <button class="btn btn-primary" onclick="addClass()">Add Class</button>
                 
-                <h2 style="margin-top: 30px;">පවතින පන්ති</h2>
+                <h2 style="margin-top: 30px;">Existing Classes</h2>
                 <div class="class-list" id="classList"></div>
             </div>
             
             <div id="students" class="tab-content">
-                <h2>සිසුන් කළමනාකරණය</h2>
+                <h2>Student Management</h2>
                 <div class="form-group">
-                    <label>පන්තිය තෝරන්න</label>
+                    <label>Select Class</label>
                     <select id="studentClassSelect" onchange="loadStudents()"></select>
                 </div>
                 
                 <div id="studentForm" style="display: none;">
-                    <h3 style="margin-top: 20px;">නව සිසුවෙකු එකතු කරන්න</h3>
+                    <h3 style="margin-top: 20px;">Add New Student</h3>
                     <div class="form-group">
-                        <label>සිසුවාගේ නම</label>
-                        <input type="text" id="studentName" placeholder="සම්පූර්ණ නම">
+                        <label>Student Name</label>
+                        <input type="text" id="studentName" placeholder="Full Name">
                     </div>
                     <div class="form-group">
-                        <label>දුරකථන අංකය</label>
+                        <label>Phone Number</label>
                         <input type="tel" id="studentPhone" placeholder="0771234567">
                     </div>
-                    <button class="btn btn-primary" onclick="addStudent()">සිසුවා එකතු කරන්න</button>
+                    <button class="btn btn-primary" onclick="addStudent()">Add Student</button>
                     
-                    <h3 style="margin-top: 30px;">සිසුන් ලැයිස්තුව</h3>
+                    <h3 style="margin-top: 30px;">Student List</h3>
                     <div id="studentCount" style="margin: 10px 0; color: #666;"></div>
                     <div class="student-list" id="studentList"></div>
                 </div>
             </div>
             
             <div id="assignments" class="tab-content">
-                <h2>නිබන්ධන කළමනාකරණය</h2>
+                <h2>Assignment Management</h2>
                 <div class="form-group">
-                    <label>පන්තිය තෝරන්න</label>
+                    <label>Select Class</label>
                     <select id="assignmentClassSelect"></select>
                 </div>
                 <div class="form-group">
-                    <label>නිබන්ධන මාතෘකාව</label>
-                    <input type="text" id="assignmentTitle" placeholder="උදා: ගණිත රේඛා ගැන පර්යේෂණයක්">
+                    <label>Assignment Title</label>
+                    <input type="text" id="assignmentTitle" placeholder="e.g., Mathematics Project">
                 </div>
                 <div class="form-group">
-                    <label>විස්තරය</label>
-                    <textarea id="assignmentDesc" rows="3" placeholder="නිබන්ධන විස්තර"></textarea>
+                    <label>Description</label>
+                    <textarea id="assignmentDesc" rows="3" placeholder="Assignment details"></textarea>
                 </div>
                 <div class="form-group">
-                    <label>නියම දිනය</label>
+                    <label>Due Date</label>
                     <input type="date" id="assignmentDue">
                 </div>
-                <button class="btn btn-primary" onclick="addAssignment()">නිබන්ධනය එකතු කරන්න</button>
+                <button class="btn btn-primary" onclick="addAssignment()">Add Assignment</button>
                 
-                <h2 style="margin-top: 30px;">පවතින නිබන්ධන</h2>
+                <h2 style="margin-top: 30px;">Current Assignments</h2>
                 <div class="assignment-list" id="assignmentList"></div>
             </div>
             
             <div id="daily" class="tab-content">
-                <h2>දෛනික වාර්තාව</h2>
+                <h2>Daily Report</h2>
                 <div class="form-group">
-                    <label>පන්තිය තෝරන්න</label>
+                    <label>Select Class</label>
                     <select id="dailyClassSelect"></select>
                 </div>
                 <div class="form-group">
-                    <label>විෂයය</label>
-                    <input type="text" id="dailySubject" placeholder="උදා: ගණිතය">
+                    <label>Subject</label>
+                    <input type="text" id="dailySubject" placeholder="e.g., Mathematics">
                 </div>
                 <div class="form-group">
-                    <label>ඉගැන්වූ පාඩම</label>
-                    <textarea id="dailyLesson" rows="3" placeholder="අද ඉගැන්වූ පාඩම් විස්තර"></textarea>
+                    <label>Lesson Taught</label>
+                    <textarea id="dailyLesson" rows="3" placeholder="Today's lesson details"></textarea>
                 </div>
                 <div class="form-group">
-                    <label>සටහන්</label>
-                    <textarea id="dailyNotes" rows="2" placeholder="විශේෂ සටහන්"></textarea>
+                    <label>Notes</label>
+                    <textarea id="dailyNotes" rows="2" placeholder="Special notes"></textarea>
                 </div>
-                <button class="btn btn-primary" onclick="addDailyReport()">වාර්තාව සුරකින්න</button>
+                <button class="btn btn-primary" onclick="addDailyReport()">Save Report</button>
                 
-                <h2 style="margin-top: 30px;">අද වාර්තා</h2>
+                <h2 style="margin-top: 30px;">Today's Reports</h2>
                 <div class="report-list" id="dailyReportList"></div>
             </div>
             
             <div id="reports" class="tab-content">
-                <h2>වාර්තා සහ විශ්ලේෂණය</h2>
+                <h2>Full Reports & Analysis</h2>
                 
                 <div class="export-section">
                     <h3>📊 Excel Export</h3>
-                    <p>සියලු දත්ත Excel ගොනුවකට export කරන්න</p>
-                    <button class="btn btn-success" onclick="exportToExcel()">📥 සියලු දත්ත Export කරන්න</button>
-                    <button class="btn btn-info" onclick="exportClassReport()">📄 පන්ති වාර්තාව Export කරන්න</button>
-                    <button class="btn btn-info" onclick="exportDailyReports()">📅 දෛනික වාර්තා Export කරන්න</button>
+                    <p>Export all data to Excel file</p>
+                    <button class="btn btn-success" onclick="exportToExcel()">📥 Export All Data</button>
+                    <button class="btn btn-info" onclick="exportClassReport()">📄 Export Class Report</button>
+                    <button class="btn btn-info" onclick="exportDailyReports()">📅 Export Daily Reports</button>
                 </div>
                 
                 <div class="report-section">
-                    <h3>සමස්ත විශ්ලේෂණය</h3>
-                    <p><strong>මුළු පන්ති ගණන:</strong> <span id="totalClasses">0</span></p>
-                    <p><strong>මුළු සිසුන් ගණන:</strong> <span id="totalStudents">0</span></p>
-                    <p><strong>මුළු නිබන්ධන ගණන:</strong> <span id="totalAssignments">0</span></p>
+                    <h3>Overall Statistics</h3>
+                    <p><strong>Total Classes:</strong> <span id="totalClasses">0</span></p>
+                    <p><strong>Total Students:</strong> <span id="totalStudents">0</span></p>
+                    <p><strong>Total Assignments:</strong> <span id="totalAssignments">0</span></p>
                 </div>
                 
                 <div class="form-group">
-                    <label>පන්තිය අනුව වාර්තාව</label>
+                    <label>Report by Class</label>
                     <select id="reportClassSelect" onchange="generateClassReport()"></select>
                 </div>
                 
@@ -486,6 +577,116 @@
     </div>
     
     <div id="notificationContainer"></div>
+    
+    <!-- Edit Modals -->
+    <div id="editClassModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Class</h2>
+                <span class="close" onclick="closeModal('editClassModal')">&times;</span>
+            </div>
+            <div class="form-group">
+                <label>Class Name</label>
+                <input type="text" id="editClassName">
+            </div>
+            <div class="form-group">
+                <label>Teacher</label>
+                <input type="text" id="editClassTeacher">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="saveClassEdit()">Save</button>
+                <button class="btn" style="background: #6c757d; color: white;" onclick="closeModal('editClassModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="editStudentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Student</h2>
+                <span class="close" onclick="closeModal('editStudentModal')">&times;</span>
+            </div>
+            <div class="form-group">
+                <label>Student Name</label>
+                <input type="text" id="editStudentName">
+            </div>
+            <div class="form-group">
+                <label>Phone Number</label>
+                <input type="tel" id="editStudentPhone">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="saveStudentEdit()">Save</button>
+                <button class="btn" style="background: #6c757d; color: white;" onclick="closeModal('editStudentModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="editAssignmentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Assignment</h2>
+                <span class="close" onclick="closeModal('editAssignmentModal')">&times;</span>
+            </div>
+            <div class="form-group">
+                <label>Title</label>
+                <input type="text" id="editAssignmentTitle">
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea id="editAssignmentDesc" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Due Date</label>
+                <input type="date" id="editAssignmentDue">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="saveAssignmentEdit()">Save</button>
+                <button class="btn" style="background: #6c757d; color: white;" onclick="closeModal('editAssignmentModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="editDailyReportModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Daily Report</h2>
+                <span class="close" onclick="closeModal('editDailyReportModal')">&times;</span>
+            </div>
+            <div class="form-group">
+                <label>Subject</label>
+                <input type="text" id="editReportSubject">
+            </div>
+            <div class="form-group">
+                <label>Lesson</label>
+                <textarea id="editReportLesson" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Notes</label>
+                <textarea id="editReportNotes" rows="2"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="saveDailyReportEdit()">Save</button>
+                <button class="btn" style="background: #6c757d; color: white;" onclick="closeModal('editDailyReportModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="whatsappModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>WhatsApp Message</h2>
+                <span class="close" onclick="closeModal('whatsappModal')">&times;</span>
+            </div>
+            <div class="form-group">
+                <label>Message</label>
+                <textarea id="whatsappMessage" rows="5" placeholder="Type your message here..."></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-success" onclick="sendWhatsApp()">Open WhatsApp</button>
+                <button class="btn" style="background: #6c757d; color: white;" onclick="closeModal('whatsappModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         // Supabase Configuration
@@ -494,13 +695,19 @@
         
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         
-        // දත්ත ගබඩාව
+        // Data storage
         let classes = [];
         let students = {};
         let assignments = [];
         let dailyReports = [];
         
-        // Database සිට දත්ත load කිරීම
+        // Edit variables
+        let currentEditId = null;
+        let currentEditClassId = null;
+        let currentEditIndex = null;
+        let currentWhatsAppPhone = null;
+        
+        // Load data from Database
         async function loadDataFromDB() {
             try {
                 const { data, error } = await supabase
@@ -514,7 +721,7 @@
                     classes = data.map(row => ({
                         id: row.id,
                         name: row.class_name,
-                        teacher: row.teacher || 'නොදන්නා',
+                        teacher: row.teacher || 'Unknown',
                         createdAt: row.created_at || new Date().toISOString()
                     }));
                     
@@ -549,7 +756,7 @@
                     localStorage.setItem('dailyReports', JSON.stringify(dailyReports));
                     
                     loadClasses();
-                    showNotification('සාර්ථකයි', 'Database සිට දත්ත load කර ගන්නා ලදී!');
+                    showNotification('Success', 'Data loaded from database!');
                 } else {
                     loadClasses();
                 }
@@ -560,11 +767,11 @@
                 assignments = JSON.parse(localStorage.getItem('assignments')) || [];
                 dailyReports = JSON.parse(localStorage.getItem('dailyReports')) || [];
                 loadClasses();
-                showNotification('දෝෂයක්', 'Database සම්බන්ධතාවක් නැත. Local දත්ත භාවිතා වේ.');
+                showNotification('Error', 'No database connection. Using local data.');
             }
         }
         
-        // Database වලට පන්තියක් save කිරීම
+        // Save class to Database
         async function saveClassToDB(classData) {
             const { data, error } = await supabase
                 .from('class')
@@ -582,7 +789,7 @@
             return data[0];
         }
         
-        // Database වල පන්තිය update කිරීම
+        // Update class in Database
         async function updateClassInDB(classId, field, value) {
             const updateData = {};
             updateData[field] = JSON.stringify(value);
@@ -595,7 +802,7 @@
             if (error) throw error;
         }
         
-        // Database සිට පන්තිය delete කිරීම
+        // Delete class from Database
         async function deleteClassFromDB(classId) {
             const { error } = await supabase
                 .from('class')
@@ -605,7 +812,7 @@
             if (error) throw error;
         }
         
-        // Notification පද්ධතිය
+        // Notification system
         function showNotification(title, message, actions = []) {
             const container = document.getElementById('notificationContainer');
             const notifId = 'notif_' + Date.now();
@@ -640,7 +847,7 @@
             }
         }
         
-        // දෛනික Reminders
+        // Daily Reminders
         function checkDailyReminders() {
             const now = new Date();
             const hours = now.getHours();
@@ -651,10 +858,10 @@
             
             if (hours === 18 && minutes === 0 && lastReminder !== today + '_18') {
                 showNotification(
-                    'දෛනික වාර්තා සිහිකැඳවීම',
-                    'අද දින සඳහා දෛනික වාර්තාව ලිවීමට කාලයයි! ඔබගේ පන්ති වාර්තා යාවත්කාලීන කරන්න.',
+                    'Daily Report Reminder',
+                    'Time to write today\'s daily report! Update your class reports.',
                     [
-                        { text: 'වාර්තාව ලියන්න', type: 'primary', onclick: "showTab('daily')" }
+                        { text: 'Write Report', type: 'primary', onclick: "showTab('daily')" }
                     ]
                 );
                 localStorage.setItem('lastDailyReminder', today + '_18');
@@ -664,10 +871,10 @@
                 const todayReports = dailyReports.filter(r => r.date === today);
                 if (todayReports.length === 0) {
                     showNotification(
-                        'දෛනික වාර්තා අවසන් සිහිකැඳවීම',
-                        'අද දින සඳහා තවමත් දෛනික වාර්තාවක් ලියා නොමැත. කරුණාකර වාර්තාව සම්පූර්ණ කරන්න.',
+                        'Final Daily Report Reminder',
+                        'You haven\'t written a daily report for today yet. Please complete the report.',
                         [
-                            { text: 'දැන් ලියන්න', type: 'primary', onclick: "showTab('daily')" }
+                            { text: 'Write Now', type: 'primary', onclick: "showTab('daily')" }
                         ]
                     );
                 }
@@ -675,7 +882,7 @@
             }
         }
         
-        // සතිපතා reminder
+        // Weekly reminder
         function checkWeeklyReminder() {
             const now = new Date();
             const dayOfWeek = now.getDay();
@@ -692,11 +899,11 @@
                 
                 if (oldReportsCount > 0) {
                     showNotification(
-                        'සතිපතා දත්ත කළමනාකරණය',
-                        `ඔබ සතියකට පෙර වාර්තා ${oldReportsCount}ක් ඇත. පැරණි දත්ත මකා Excel export කරන්න නිර්දේශ කෙරේ.`,
+                        'Weekly Data Management',
+                        `You have ${oldReportsCount} reports older than a week. Consider exporting and deleting old data.`,
                         [
-                            { text: 'වාර්තා Export කරන්න', type: 'success', onclick: "exportDailyReports()" },
-                            { text: 'පැරණි වාර්තා මකන්න', type: 'danger', onclick: "deleteOldReports()" }
+                            { text: 'Export Reports', type: 'success', onclick: "exportDailyReports()" },
+                            { text: 'Delete Old Reports', type: 'danger', onclick: "deleteOldReports()" }
                         ]
                     );
                 }
@@ -704,7 +911,7 @@
             }
         }
         
-        // පැරණි වාර්තා මකා දැමීම
+        // Delete old reports
         function deleteOldReports() {
             const weekAgo = new Date();
             weekAgo.setDate(weekAgo.getDate() - 7);
@@ -718,7 +925,7 @@
             const deletedCount = oldCount - dailyReports.length;
             localStorage.setItem('dailyReports', JSON.stringify(dailyReports));
             
-            alert(`සතියකට වඩා පැරණි වාර්තා ${deletedCount}ක් මකා දමන ලදී.`);
+            alert(`Deleted ${deletedCount} reports older than a week.`);
             loadTodayReports();
         }
         
@@ -732,14 +939,14 @@
             checkWeeklyReminder();
         }, 5000);
         
-        // දිනය යාවත්කාලීන කිරීම
+        // Update date
         function updateDate() {
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            const date = new Date().toLocaleDateString('si-LK', options);
+            const date = new Date().toLocaleDateString('en-US', options);
             document.getElementById('currentDate').textContent = date;
         }
         
-        // Tab මාරු කිරීම
+        // Switch tabs
         function showTab(tabName) {
             const tabs = document.querySelectorAll('.tab-content');
             const navTabs = document.querySelectorAll('.nav-tab');
@@ -750,10 +957,10 @@
             document.getElementById(tabName).classList.add('active');
             
             navTabs.forEach(nav => {
-                if (nav.textContent.includes(tabName === 'classes' ? 'පන්ති' : 
-                   tabName === 'students' ? 'සිසුන්' :
-                   tabName === 'assignments' ? 'නිබන්ධන' :
-                   tabName === 'daily' ? 'දෛනික' : 'වාර්තා')) {
+                if (nav.textContent.includes(tabName === 'classes' ? 'Classes' : 
+                   tabName === 'students' ? 'Students' :
+                   tabName === 'assignments' ? 'Assignments' :
+                   tabName === 'daily' ? 'DR' : 'FR')) {
                     nav.classList.add('active');
                 }
             });
@@ -771,25 +978,25 @@
             }
         }
         
-        // පන්ති එකතු කිරීම
+        // Add class
         async function addClass() {
             const name = document.getElementById('className').value.trim();
             const teacher = document.getElementById('classTeacher').value.trim();
             
             if (!name) {
-                alert('පන්ති නම ඇතුළත් කරන්න');
+                alert('Please enter class name');
                 return;
             }
             
             if (classes.length >= 30) {
-                alert('පන්ති 30ක් දැනටමත් එකතු කර ඇත');
+                alert('Maximum 30 classes already added');
                 return;
             }
             
             try {
                 const newClass = {
                     name: name,
-                    teacher: teacher || 'නොදන්නා',
+                    teacher: teacher || 'Unknown',
                     createdAt: new Date().toISOString()
                 };
                 
@@ -806,13 +1013,13 @@
                 document.getElementById('classTeacher').value = '';
                 
                 loadClasses();
-                showNotification('සාර්ථකයි', 'පන්තිය database එකට save කරන ලදී!');
+                showNotification('Success', 'Class saved to database!');
             } catch (error) {
                 alert('Database error: ' + error.message);
             }
         }
         
-        // පන්ති පූරණය කිරීම
+        // Load classes
         function loadClasses() {
             const container = document.getElementById('classList');
             container.innerHTML = '';
@@ -823,17 +1030,18 @@
                 div.className = 'class-card';
                 div.innerHTML = `
                     <div class="card-title">${cls.name}</div>
-                    <div class="card-info">ගුරුවරයා: ${cls.teacher}</div>
-                    <div class="card-info">සිසුන්: ${studentCount}/50</div>
-                    <button class="delete-btn" onclick="deleteClass(${cls.id})">මකන්න</button>
+                    <div class="card-info">Teacher: ${cls.teacher}</div>
+                    <div class="card-info">Students: ${studentCount}/50</div>
+                    <button class="edit-btn" onclick="editClass(${cls.id})">Edit</button>
+                    <button class="delete-btn" onclick="deleteClass(${cls.id})">Delete</button>
                 `;
                 container.appendChild(div);
             });
         }
         
-        // පන්තිය මකා දැමීම
+        // Delete class
         async function deleteClass(id) {
-            if (confirm('ඔබට මෙම පන්තිය මකා දැමීමට අවශ්‍ය ද?')) {
+            if (confirm('Do you want to delete this class?')) {
                 try {
                     await deleteClassFromDB(id);
                     
@@ -844,17 +1052,17 @@
                     localStorage.setItem('students', JSON.stringify(students));
                     
                     loadClasses();
-                    showNotification('සාර්ථකයි', 'පන්තිය database එකෙන් මකා දමන ලදී!');
+                    showNotification('Success', 'Class deleted from database!');
                 } catch (error) {
                     alert('Database error: ' + error.message);
                 }
             }
         }
         
-        // සිසුන් පන්ති select යාවත්කාලීන කිරීම
+        // Update student class select
         function updateStudentClassSelect() {
             const select = document.getElementById('studentClassSelect');
-            select.innerHTML = '<option value="">පන්තියක් තෝරන්න</option>';
+            select.innerHTML = '<option value="">Select a class</option>';
             
             classes.forEach(cls => {
                 const option = document.createElement('option');
@@ -864,7 +1072,7 @@
             });
         }
         
-        // සිසුන් පූරණය කිරීම
+        // Load students
         function loadStudents() {
             const classId = document.getElementById('studentClassSelect').value;
             const form = document.getElementById('studentForm');
@@ -880,33 +1088,35 @@
             container.innerHTML = '';
             
             const classStudents = students[classId] || [];
-            countDiv.textContent = `සිසුන් ගණන: ${classStudents.length}/50`;
+            countDiv.textContent = `Student Count: ${classStudents.length}/50`;
             
             classStudents.forEach((student, index) => {
                 const div = document.createElement('div');
                 div.className = 'student-card';
                 div.innerHTML = `
                     <div class="card-title">${student.name}</div>
-                    <div class="card-info">දුරකථනය: ${student.phone}</div>
-                    <button class="delete-btn" onclick="deleteStudent(${classId}, ${index})">මකන්න</button>
+                    <div class="card-info">Phone: ${student.phone}</div>
+                    <button class="whatsapp-btn" onclick="openWhatsApp('${student.phone}')">📱 WhatsApp</button>
+                    <button class="edit-btn" onclick="editStudent(${classId}, ${index})">Edit</button>
+                    <button class="delete-btn" onclick="deleteStudent(${classId}, ${index})">Delete</button>
                 `;
                 container.appendChild(div);
             });
         }
         
-        // සිසුවෙකු එකතු කිරීම
+        // Add student
         async function addStudent() {
             const classId = document.getElementById('studentClassSelect').value;
             const name = document.getElementById('studentName').value.trim();
             const phone = document.getElementById('studentPhone').value.trim();
             
             if (!classId) {
-                alert('පන්තියක් තෝරන්න');
+                alert('Please select a class');
                 return;
             }
             
             if (!name || !phone) {
-                alert('සියලු තොරතුරු ඇතුළත් කරන්න');
+                alert('Please fill all information');
                 return;
             }
             
@@ -915,7 +1125,7 @@
             }
             
             if (students[classId].length >= 50) {
-                alert('මෙම පන්තියට සිසුන් 50ක් දැනටමත් එකතු කර ඇත');
+                alert('Maximum 50 students already added to this class');
                 return;
             }
             
@@ -935,15 +1145,15 @@
                 
                 loadStudents();
                 loadClasses();
-                showNotification('සාර්ථකයි', 'සිසුවා database එකට save කරන ලදී!');
+                showNotification('Success', 'Student saved to database!');
             } catch (error) {
                 alert('Database error: ' + error.message);
             }
         }
         
-        // සිසුවෙකු මකා දැමීම
+        // Delete student
         async function deleteStudent(classId, index) {
-            if (confirm('ඔබට මෙම සිසුවා මකා දැමීමට අවශ්‍ය ද?')) {
+            if (confirm('Do you want to delete this student?')) {
                 try {
                     students[classId].splice(index, 1);
                     
@@ -952,17 +1162,17 @@
                     localStorage.setItem('students', JSON.stringify(students));
                     loadStudents();
                     loadClasses();
-                    showNotification('සාර්ථකයි', 'සිසුවා database එකෙන් මකා දමන ලදී!');
+                    showNotification('Success', 'Student deleted from database!');
                 } catch (error) {
                     alert('Database error: ' + error.message);
                 }
             }
         }
         
-        // නිබන්ධන select යාවත්කාලීන කිරීම
+        // Update assignment class select
         function updateAssignmentClassSelect() {
             const select = document.getElementById('assignmentClassSelect');
-            select.innerHTML = '<option value="">පන්තියක් තෝරන්න</option>';
+            select.innerHTML = '<option value="">Select a class</option>';
             
             classes.forEach(cls => {
                 const option = document.createElement('option');
@@ -974,7 +1184,7 @@
             loadAssignments();
         }
         
-        // නිබන්ධනයක් එකතු කිරීම
+        // Add assignment
         async function addAssignment() {
             const classId = document.getElementById('assignmentClassSelect').value;
             const title = document.getElementById('assignmentTitle').value.trim();
@@ -982,7 +1192,7 @@
             const due = document.getElementById('assignmentDue').value;
             
             if (!classId || !title || !due) {
-                alert('සියලු අවශ්‍ය තොරතුරු ඇතුළත් කරන්න');
+                alert('Please fill all required information');
                 return;
             }
             
@@ -1008,13 +1218,13 @@
                 document.getElementById('assignmentDue').value = '';
                 
                 loadAssignments();
-                showNotification('සාර්ථකයි', 'නිබන්ධනය database එකට save කරන ලදී!');
+                showNotification('Success', 'Assignment saved to database!');
             } catch (error) {
                 alert('Database error: ' + error.message);
             }
         }
         
-        // නිබන්ධන පූරණය කිරීම
+        // Load assignments
         function loadAssignments() {
             const container = document.getElementById('assignmentList');
             container.innerHTML = '';
@@ -1027,18 +1237,19 @@
                 div.className = 'assignment-card';
                 div.innerHTML = `
                     <div class="card-title">${assign.title}</div>
-                    <div class="card-info">පන්තිය: ${cls.name}</div>
-                    <div class="card-info">නියම දිනය: ${assign.dueDate}</div>
+                    <div class="card-info">Class: ${cls.name}</div>
+                    <div class="card-info">Due Date: ${assign.dueDate}</div>
                     <div class="card-info">${assign.description || ''}</div>
-                    <button class="delete-btn" onclick="deleteAssignment(${assign.id})">මකන්න</button>
+                    <button class="edit-btn" onclick="editAssignment(${assign.id})">Edit</button>
+                    <button class="delete-btn" onclick="deleteAssignment(${assign.id})">Delete</button>
                 `;
                 container.appendChild(div);
             });
         }
         
-        // නිබන්ධනයක් මකා දැමීම
+        // Delete assignment
         async function deleteAssignment(id) {
-            if (confirm('ඔබට මෙම නිබන්ධනය මකා දැමීමට අවශ්‍ය ද?')) {
+            if (confirm('Do you want to delete this assignment?')) {
                 try {
                     const assignment = assignments.find(a => a.id === id);
                     if (!assignment) return;
@@ -1050,17 +1261,17 @@
                     
                     localStorage.setItem('assignments', JSON.stringify(assignments));
                     loadAssignments();
-                    showNotification('සාර්ථකයි', 'නිබන්ධනය database එකෙන් මකා දමන ලදී!');
+                    showNotification('Success', 'Assignment deleted from database!');
                 } catch (error) {
                     alert('Database error: ' + error.message);
                 }
             }
         }
         
-        // දෛනික වාර්තා select යාවත්කාලීන කිරීම
+        // Update daily class select
         function updateDailyClassSelect() {
             const select = document.getElementById('dailyClassSelect');
-            select.innerHTML = '<option value="">පන්තියක් තෝරන්න</option>';
+            select.innerHTML = '<option value="">Select a class</option>';
             
             classes.forEach(cls => {
                 const option = document.createElement('option');
@@ -1070,7 +1281,7 @@
             });
         }
         
-        // දෛනික වාර්තාවක් එකතු කිරීම
+        // Add daily report
         async function addDailyReport() {
             const classId = document.getElementById('dailyClassSelect').value;
             const subject = document.getElementById('dailySubject').value.trim();
@@ -1078,7 +1289,7 @@
             const notes = document.getElementById('dailyNotes').value.trim();
             
             if (!classId || !subject || !lesson) {
-                alert('සියලු අවශ්‍ය තොරතුරු ඇතුළත් කරන්න');
+                alert('Please fill all required information');
                 return;
             }
             
@@ -1105,13 +1316,13 @@
                 document.getElementById('dailyNotes').value = '';
                 
                 loadTodayReports();
-                showNotification('සාර්ථකයි', 'දෛනික වාර්තාව database එකට save කරන ලදී!');
+                showNotification('Success', 'Daily report saved to database!');
             } catch (error) {
                 alert('Database error: ' + error.message);
             }
         }
         
-        // අද වාර්තා පූරණය කිරීම
+        // Load today's reports
         function loadTodayReports() {
             const container = document.getElementById('dailyReportList');
             const today = new Date().toISOString().split('T')[0];
@@ -1127,21 +1338,22 @@
                 div.className = 'report-card';
                 div.innerHTML = `
                     <div class="card-title">${cls.name} - ${report.subject}</div>
-                    <div class="card-info"><strong>පාඩම:</strong> ${report.lesson}</div>
-                    ${report.notes ? `<div class="card-info"><strong>සටහන්:</strong> ${report.notes}</div>` : ''}
-                    <button class="delete-btn" onclick="deleteDailyReport(${report.id})">මකන්න</button>
+                    <div class="card-info"><strong>Lesson:</strong> ${report.lesson}</div>
+                    ${report.notes ? `<div class="card-info"><strong>Notes:</strong> ${report.notes}</div>` : ''}
+                    <button class="edit-btn" onclick="editDailyReport(${report.id})">Edit</button>
+                    <button class="delete-btn" onclick="deleteDailyReport(${report.id})">Delete</button>
                 `;
                 container.appendChild(div);
             });
             
             if (todayReports.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #666;">අද වාර්තා නැත</p>';
+                container.innerHTML = '<p style="text-align: center; color: #666;">No reports today</p>';
             }
         }
         
-        // දෛනික වාර්තාවක් මකා දැමීම
+        // Delete daily report
         async function deleteDailyReport(id) {
-            if (confirm('ඔබට මෙම වාර්තාව මකා දැමීමට අවශ්‍ය ද?')) {
+            if (confirm('Do you want to delete this report?')) {
                 try {
                     const report = dailyReports.find(r => r.id === id);
                     if (!report) return;
@@ -1153,17 +1365,17 @@
                     
                     localStorage.setItem('dailyReports', JSON.stringify(dailyReports));
                     loadTodayReports();
-                    showNotification('සාර්ථකයි', 'වාර්තාව database එකෙන් මකා දමන ලදී!');
+                    showNotification('Success', 'Report deleted from database!');
                 } catch (error) {
                     alert('Database error: ' + error.message);
                 }
             }
         }
         
-        // වාර්තා යාවත්කාලීන කිරීම
+        // Update report class select
         function updateReportClassSelect() {
             const select = document.getElementById('reportClassSelect');
-            select.innerHTML = '<option value="">සියල්ල</option>';
+            select.innerHTML = '<option value="">All</option>';
             
             classes.forEach(cls => {
                 const option = document.createElement('option');
@@ -1200,21 +1412,21 @@
             
             container.innerHTML = `
                 <div class="report-section">
-                    <h3>${cls.name} - සවිස්තරාත්මක වාර්තාව</h3>
-                    <p><strong>ගුරුවරයා:</strong> ${cls.teacher}</p>
-                    <p><strong>සිසුන් ගණන:</strong> ${classStudents.length}</p>
-                    <p><strong>නිබන්ධන ගණන:</strong> ${classAssignments.length}</p>
-                    <p><strong>දෛනික වාර්තා ගණන:</strong> ${classReports.length}</p>
+                    <h3>${cls.name} - Detailed Report</h3>
+                    <p><strong>Teacher:</strong> ${cls.teacher}</p>
+                    <p><strong>Student Count:</strong> ${classStudents.length}</p>
+                    <p><strong>Assignment Count:</strong> ${classAssignments.length}</p>
+                    <p><strong>Daily Report Count:</strong> ${classReports.length}</p>
                 </div>
             `;
         }
         
-        // Excel Export කාර්යයන්
+        // Excel Export functions
         function exportToExcel() {
             let csv = '\ufeff';
             
-            csv += 'පන්ති දත්ත\n';
-            csv += 'පන්ති නම,ගුරුවරයා,සිසුන් ගණන\n';
+            csv += 'Class Data\n';
+            csv += 'Class Name,Teacher,Student Count\n';
             classes.forEach(cls => {
                 const studentCount = students[cls.id] ? students[cls.id].length : 0;
                 csv += `"${cls.name}","${cls.teacher}",${studentCount}\n`;
@@ -1222,8 +1434,8 @@
             
             csv += '\n\n';
             
-            csv += 'සිසුන් දත්ත\n';
-            csv += 'පන්ති නම,සිසුවාගේ නම,දුරකථන අංකය\n';
+            csv += 'Student Data\n';
+            csv += 'Class Name,Student Name,Phone Number\n';
             classes.forEach(cls => {
                 const classStudents = students[cls.id] || [];
                 classStudents.forEach(student => {
@@ -1233,8 +1445,8 @@
             
             csv += '\n\n';
             
-            csv += 'නිබන්ධන දත්ත\n';
-            csv += 'පන්ති නම,මාතෘකාව,විස්තරය,නියම දිනය\n';
+            csv += 'Assignment Data\n';
+            csv += 'Class Name,Title,Description,Due Date\n';
             assignments.forEach(assign => {
                 const cls = classes.find(c => c.id === assign.classId);
                 if (cls) {
@@ -1242,14 +1454,14 @@
                 }
             });
             
-            downloadCSV(csv, 'පන්ති_කළමනාකරණ_සම්පූර්ණ_වාර්තාව.csv');
+            downloadCSV(csv, 'Complete_Class_Management_Report.csv');
         }
         
         function exportClassReport() {
             let csv = '\ufeff';
             
-            csv += 'පන්ති වාර්තාව\n';
-            csv += 'පන්ති නම,ගුරුවරයා,සිසුන් ගණන,නිබන්ධන ගණන,දෛනික වාර්තා ගණන\n';
+            csv += 'Class Report\n';
+            csv += 'Class Name,Teacher,Student Count,Assignment Count,Daily Report Count\n';
             
             classes.forEach(cls => {
                 const studentCount = students[cls.id] ? students[cls.id].length : 0;
@@ -1259,14 +1471,14 @@
                 csv += `"${cls.name}","${cls.teacher}",${studentCount},${assignmentCount},${reportCount}\n`;
             });
             
-            downloadCSV(csv, 'පන්ති_සාරාංශ_වාර්තාව.csv');
+            downloadCSV(csv, 'Class_Summary_Report.csv');
         }
         
         function exportDailyReports() {
             let csv = '\ufeff';
             
-            csv += 'දෛනික වාර්තා\n';
-            csv += 'දිනය,පන්ති නම,විෂයය,පාඩම,සටහන්\n';
+            csv += 'Daily Reports\n';
+            csv += 'Date,Class Name,Subject,Lesson,Notes\n';
             
             dailyReports.sort((a, b) => new Date(b.date) - new Date(a.date));
             
@@ -1277,7 +1489,7 @@
                 }
             });
             
-            downloadCSV(csv, 'දෛනික_වාර්තා.csv');
+            downloadCSV(csv, 'Daily_Reports.csv');
         }
         
         function downloadCSV(csv, filename) {
@@ -1293,7 +1505,7 @@
             link.click();
             document.body.removeChild(link);
             
-            showNotification('Export සාර්ථකයි', `${filename} ගොනුව download කරන ලදී!`);
+            showNotification('Export Successful', `${filename} file downloaded!`);
         }
         
         // Initialize
@@ -1301,6 +1513,216 @@
         loadDataFromDB();
         
         setInterval(updateDate, 60000);
+        
+        // Modal Functions
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        // Edit class
+        function editClass(id) {
+            const cls = classes.find(c => c.id === id);
+            if (!cls) return;
+            
+            currentEditId = id;
+            document.getElementById('editClassName').value = cls.name;
+            document.getElementById('editClassTeacher').value = cls.teacher;
+            document.getElementById('editClassModal').style.display = 'block';
+        }
+        
+        async function saveClassEdit() {
+            const name = document.getElementById('editClassName').value.trim();
+            const teacher = document.getElementById('editClassTeacher').value.trim();
+            
+            if (!name) {
+                alert('Please enter class name');
+                return;
+            }
+            
+            try {
+                const classIndex = classes.findIndex(c => c.id === currentEditId);
+                if (classIndex !== -1) {
+                    classes[classIndex].name = name;
+                    classes[classIndex].teacher = teacher || 'Unknown';
+                    
+                    const { error } = await supabase
+                        .from('class')
+                        .update({
+                            class_name: name,
+                            teacher: teacher || 'Unknown'
+                        })
+                        .eq('id', currentEditId);
+                    
+                    if (error) throw error;
+                    
+                    localStorage.setItem('classes', JSON.stringify(classes));
+                    loadClasses();
+                    closeModal('editClassModal');
+                    showNotification('Success', 'Class updated!');
+                }
+            } catch (error) {
+                alert('Database error: ' + error.message);
+            }
+        }
+        
+        // Edit student
+        function editStudent(classId, index) {
+            const student = students[classId][index];
+            if (!student) return;
+            
+            currentEditClassId = classId;
+            currentEditIndex = index;
+            document.getElementById('editStudentName').value = student.name;
+            document.getElementById('editStudentPhone').value = student.phone;
+            document.getElementById('editStudentModal').style.display = 'block';
+        }
+        
+        async function saveStudentEdit() {
+            const name = document.getElementById('editStudentName').value.trim();
+            const phone = document.getElementById('editStudentPhone').value.trim();
+            
+            if (!name || !phone) {
+                alert('Please fill all information');
+                return;
+            }
+            
+            try {
+                students[currentEditClassId][currentEditIndex].name = name;
+                students[currentEditClassId][currentEditIndex].phone = phone;
+                
+                await updateClassInDB(currentEditClassId, 'student', students[currentEditClassId]);
+                
+                localStorage.setItem('students', JSON.stringify(students));
+                loadStudents();
+                closeModal('editStudentModal');
+                showNotification('Success', 'Student updated!');
+            } catch (error) {
+                alert('Database error: ' + error.message);
+            }
+        }
+        
+        // Edit assignment
+        function editAssignment(id) {
+            const assign = assignments.find(a => a.id === id);
+            if (!assign) return;
+            
+            currentEditId = id;
+            document.getElementById('editAssignmentTitle').value = assign.title;
+            document.getElementById('editAssignmentDesc').value = assign.description || '';
+            document.getElementById('editAssignmentDue').value = assign.dueDate;
+            document.getElementById('editAssignmentModal').style.display = 'block';
+        }
+        
+        async function saveAssignmentEdit() {
+            const title = document.getElementById('editAssignmentTitle').value.trim();
+            const desc = document.getElementById('editAssignmentDesc').value.trim();
+            const due = document.getElementById('editAssignmentDue').value;
+            
+            if (!title || !due) {
+                alert('Please fill title and due date');
+                return;
+            }
+            
+            try {
+                const assignIndex = assignments.findIndex(a => a.id === currentEditId);
+                if (assignIndex !== -1) {
+                    assignments[assignIndex].title = title;
+                    assignments[assignIndex].description = desc;
+                    assignments[assignIndex].dueDate = due;
+                    
+                    const classId = assignments[assignIndex].classId;
+                    const classAssignments = assignments.filter(a => a.classId === classId);
+                    await updateClassInDB(classId, 'tutes', classAssignments);
+                    
+                    localStorage.setItem('assignments', JSON.stringify(assignments));
+                    loadAssignments();
+                    closeModal('editAssignmentModal');
+                    showNotification('Success', 'Assignment updated!');
+                }
+            } catch (error) {
+                alert('Database error: ' + error.message);
+            }
+        }
+        
+        // Edit daily report
+        function editDailyReport(id) {
+            const report = dailyReports.find(r => r.id === id);
+            if (!report) return;
+            
+            currentEditId = id;
+            document.getElementById('editReportSubject').value = report.subject;
+            document.getElementById('editReportLesson').value = report.lesson;
+            document.getElementById('editReportNotes').value = report.notes || '';
+            document.getElementById('editDailyReportModal').style.display = 'block';
+        }
+        
+        async function saveDailyReportEdit() {
+            const subject = document.getElementById('editReportSubject').value.trim();
+            const lesson = document.getElementById('editReportLesson').value.trim();
+            const notes = document.getElementById('editReportNotes').value.trim();
+            
+            if (!subject || !lesson) {
+                alert('Please fill subject and lesson');
+                return;
+            }
+            
+            try {
+                const reportIndex = dailyReports.findIndex(r => r.id === currentEditId);
+                if (reportIndex !== -1) {
+                    dailyReports[reportIndex].subject = subject;
+                    dailyReports[reportIndex].lesson = lesson;
+                    dailyReports[reportIndex].notes = notes;
+                    
+                    const classId = dailyReports[reportIndex].classId;
+                    const classReports = dailyReports.filter(r => r.classId === classId);
+                    await updateClassInDB(classId, 'd_report', classReports);
+                    
+                    localStorage.setItem('dailyReports', JSON.stringify(dailyReports));
+                    loadTodayReports();
+                    closeModal('editDailyReportModal');
+                    showNotification('Success', 'Report updated!');
+                }
+            } catch (error) {
+                alert('Database error: ' + error.message);
+            }
+        }
+        
+        // WhatsApp Functions
+        function openWhatsApp(phone) {
+            currentWhatsAppPhone = phone;
+            document.getElementById('whatsappMessage').value = '';
+            document.getElementById('whatsappModal').style.display = 'block';
+        }
+        
+        function sendWhatsApp() {
+            const message = document.getElementById('whatsappMessage').value.trim();
+            
+            if (!message) {
+                alert('Please type a message');
+                return;
+            }
+            
+            let phone = currentWhatsAppPhone.replace(/[^0-9]/g, '');
+            
+            if (phone.startsWith('0')) {
+                phone = '94' + phone.substring(1);
+            } else if (!phone.startsWith('94')) {
+                phone = '94' + phone;
+            }
+            
+            const encodedMessage = encodeURIComponent(message);
+            const whatsappUrl = `https://wa.me/${phone}?text=${encodedMessage}`;
+            
+            window.open(whatsappUrl, '_blank');
+            closeModal('whatsappModal');
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
     </script>
 </body>
 </html>
