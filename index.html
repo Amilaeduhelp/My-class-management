@@ -61,6 +61,7 @@
             <button class="nav-tab" onclick="showTab(4)">Assignments</button>
             <button class="nav-tab" onclick="showTab(5)">Daily</button>
             <button class="nav-tab" onclick="showTab(6)">Reports</button>
+            <button class="nav-tab" onclick="showTab(7)">Timetable</button>
         </div>
         
         <div class="content">
@@ -135,6 +136,11 @@
                 <button class="btn btn-info" onclick="expClass()">📄 Class Report</button>
                 <button class="btn btn-info" onclick="expDaily()">📅 Daily Reports</button>
                 <div id="stats" style="margin-top:20px;"></div>
+            </div>
+            
+            <div id="t7" class="tab-content">
+                <h2>📅 Class Timetable</h2>
+                <iframe src="timetable.html" style="width:100%; height:calc(100vh - 300px); border:none; border-radius:10px; background:white;"></iframe>
             </div>
         </div>
     </div>
@@ -250,6 +256,273 @@
             ED = { type: 'cls', id };
             document.getElementById('mtitle').textContent = 'Edit Class';
             document.getElementById('mbody').innerHTML = `<input type="text" id="ein" value="${c.class_name}" style="width:100%;padding:10px;">`;
+            document.getElementById('modal').style.display = 'block';
+        }
+        
+        function loadPwd() {
+            const id = document.getElementById('psel').value;
+            const sec = document.getElementById('psec');
+            if (!id) { sec.style.display = 'none'; return; }
+            sec.style.display = 'block';
+            const c = CLS.find(x => x.id == id);
+            document.getElementById('cpwd').innerHTML = c.passcode ? 
+                `<div class="pwd-box"><strong>${c.passcode}</strong><button class="btn-sm btn-info" onclick="copyTxt('${c.passcode}')">📋</button></div>` :
+                '<p style="color:#999;">No password</p>';
+        }
+        
+        function genPwd() {
+            document.getElementById('pwd').value = PWDS[Math.floor(Math.random() * PWDS.length)];
+        }
+        
+        async function setPwd() {
+            const id = document.getElementById('psel').value;
+            const pwd = document.getElementById('pwd').value.trim();
+            if (!id || !pwd) return alert('Select class & enter password');
+            try {
+                await SB.from('class').update({ passcode: pwd }).eq('id', id);
+                CLS.find(c => c.id == id).passcode = pwd;
+                document.getElementById('pwd').value = '';
+                loadPwd();
+                loadCls();
+                notify('✅ Password set');
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
+        }
+        
+        function loadMsg() {
+            const id = document.getElementById('msel').value;
+            const sec = document.getElementById('msec');
+            if (!id) { sec.style.display = 'none'; return; }
+            sec.style.display = 'block';
+            const c = CLS.find(x => x.id == id);
+            const msgs = JSON.parse(c.message || '[]').sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+            document.getElementById('msgList').innerHTML = msgs.length ? msgs.map(m => 
+                `<div class="card"><div class="msg-box">${m.content}</div>
+                <div class="card-info">📅 ${new Date(m.createdAt).toLocaleString()}</div>
+                <button class="btn-sm btn-del" onclick="delMsg(${id}, '${m.createdAt}')">Delete</button></div>`
+            ).join('') : '<p>No messages</p>';
+        }
+        
+        async function sendMsg() {
+            const id = document.getElementById('msel').value;
+            const msg = document.getElementById('msg').value.trim();
+            if (!id || !msg) return alert('Select class & type message');
+            try {
+                const c = CLS.find(x => x.id == id);
+                const msgs = JSON.parse(c.message || '[]');
+                msgs.push({ content: msg, createdAt: new Date().toISOString(), type: 'teacher' });
+                await saveDB(id, 'message', msgs);
+                c.message = JSON.stringify(msgs);
+                document.getElementById('msg').value = '';
+                loadMsg();
+                notify('✅ Sent');
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
+        }
+        
+        async function delMsg(id, ts) {
+            if (!confirm('Delete?')) return;
+            try {
+                const c = CLS.find(x => x.id == id);
+                const msgs = JSON.parse(c.message || '[]').filter(m => m.createdAt !== ts);
+                await saveDB(id, 'message', msgs);
+                c.message = JSON.stringify(msgs);
+                loadMsg();
+                notify('✅ Deleted');
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
+        }
+        
+        function loadStd() {
+            const id = document.getElementById('ssel').value;
+            const sec = document.getElementById('ssec');
+            if (!id) { sec.style.display = 'none'; return; }
+            sec.style.display = 'block';
+            const c = CLS.find(x => x.id == id);
+            const st = JSON.parse(c.student || '[]');
+            document.getElementById('scnt').textContent = `(${st.length}/50)`;
+            document.getElementById('stdList').innerHTML = st.map((s, i) => 
+                `<div class="card"><div class="card-title">${s.name}</div>
+                <div class="card-info">📱 ${s.phone}</div>
+                <button class="btn-sm btn-wa" onclick="openWA('${s.phone}')">WhatsApp</button>
+                <button class="btn-sm btn-edit" onclick="editStd(${id}, ${i})">Edit</button>
+                <button class="btn-sm btn-del" onclick="delStd(${id}, ${i})">Delete</button></div>`
+            ).join('');
+        }
+        
+        async function addStd() {
+            const id = document.getElementById('ssel').value;
+            const name = document.getElementById('sname').value.trim();
+            const phone = document.getElementById('sphone').value.trim();
+            if (!id || !name || !phone) return alert('Fill all');
+            try {
+                const c = CLS.find(x => x.id == id);
+                const st = JSON.parse(c.student || '[]');
+                if (st.length >= 50) return alert('Max 50');
+                st.push({ name, phone });
+                await saveDB(id, 'student', st);
+                c.student = JSON.stringify(st);
+                document.getElementById('sname').value = '';
+                document.getElementById('sphone').value = '';
+                loadStd();
+                loadCls();
+                notify('✅ Added');
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
+        }
+        
+        async function delStd(id, i) {
+            if (!confirm('Delete?')) return;
+            try {
+                const c = CLS.find(x => x.id == id);
+                const st = JSON.parse(c.student || '[]');
+                st.splice(i, 1);
+                await saveDB(id, 'student', st);
+                c.student = JSON.stringify(st);
+                loadStd();
+                loadCls();
+                notify('✅ Deleted');
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
+        }
+        
+        function editStd(id, i) {
+            const c = CLS.find(x => x.id == id);
+            const s = JSON.parse(c.student || '[]')[i];
+            ED = { type: 'std', id, i };
+            document.getElementById('mtitle').textContent = 'Edit Student';
+            document.getElementById('mbody').innerHTML = 
+                `<input type="text" id="ein1" value="${s.name}" style="width:100%;padding:10px;margin-bottom:10px;">
+                <input type="tel" id="ein2" value="${s.phone}" style="width:100%;padding:10px;">`;
+            document.getElementById('modal').style.display = 'block';
+        }
+        
+        async function addAsgn() {
+            const id = document.getElementById('asel').value;
+            const title = document.getElementById('atitle').value.trim();
+            const desc = document.getElementById('adesc').value.trim();
+            const due = document.getElementById('adue').value;
+            if (!id || !title || !due) return alert('Fill required');
+            try {
+                const c = CLS.find(x => x.id == id);
+                const as = JSON.parse(c.tutes || '[]');
+                as.push({ id: Date.now(), title, description: desc, dueDate: due });
+                await saveDB(id, 'tutes', as);
+                c.tutes = JSON.stringify(as);
+                document.getElementById('atitle').value = '';
+                document.getElementById('adesc').value = '';
+                document.getElementById('adue').value = '';
+                loadAsgn();
+                notify('✅ Added');
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
+        }
+        
+        function loadAsgn() {
+            document.getElementById('asgnList').innerHTML = CLS.flatMap(c => {
+                const as = JSON.parse(c.tutes || '[]');
+                return as.map(a => 
+                    `<div class="card"><div class="card-title">${a.title}</div>
+                    <div class="card-info">Class: ${c.class_name}</div>
+                    <div class="card-info">Due: ${a.dueDate}</div>
+                    <div class="card-info">${a.description||''}</div>
+                    <button class="btn-sm btn-edit" onclick="editAsgn(${c.id}, ${a.id})">Edit</button>
+                    <button class="btn-sm btn-del" onclick="delAsgn(${c.id}, ${a.id})">Delete</button></div>`
+                );
+            }).join('');
+        }
+        
+        async function delAsgn(cid, aid) {
+            if (!confirm('Delete?')) return;
+            try {
+                const c = CLS.find(x => x.id == cid);
+                const as = JSON.parse(c.tutes || '[]').filter(a => a.id !== aid);
+                await saveDB(cid, 'tutes', as);
+                c.tutes = JSON.stringify(as);
+                loadAsgn();
+                notify('✅ Deleted');
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
+        }
+        
+        function editAsgn(cid, aid) {
+            const c = CLS.find(x => x.id == cid);
+            const a = JSON.parse(c.tutes || '[]').find(x => x.id === aid);
+            ED = { type: 'asgn', cid, aid };
+            document.getElementById('mtitle').textContent = 'Edit Assignment';
+            document.getElementById('mbody').innerHTML = 
+                `<input type="text" id="ein1" value="${a.title}" style="width:100%;padding:10px;margin-bottom:10px;">
+                <textarea id="ein2" rows="3" style="width:100%;padding:10px;margin-bottom:10px;">${a.description||''}</textarea>
+                <input type="date" id="ein3" value="${a.dueDate}" style="width:100%;padding:10px;">`;
+            document.getElementById('modal').style.display = 'block';
+        }
+        
+        async function addDaily() {
+            const id = document.getElementById('dsel').value;
+            const sub = document.getElementById('dsub').value.trim();
+            const less = document.getElementById('dless').value.trim();
+            const note = document.getElementById('dnote').value.trim();
+            if (!id || !sub || !less) return alert('Fill required');
+            try {
+                const c = CLS.find(x => x.id == id);
+                const dr = JSON.parse(c.d_report || '[]');
+                dr.push({ id: Date.now(), subject: sub, lesson: less, notes: note, date: new Date().toISOString().split('T')[0] });
+                await saveDB(id, 'd_report', dr);
+                c.d_report = JSON.stringify(dr);
+                document.getElementById('dsub').value = '';
+                document.getElementById('dless').value = '';
+                document.getElementById('dnote').value = '';
+                loadDaily();
+                notify('✅ Saved');
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
+        }
+        
+        function loadDaily() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('dailyList').innerHTML = CLS.flatMap(c => {
+                const dr = JSON.parse(c.d_report || '[]').filter(r => r.date === today);
+                return dr.map(r => 
+                    `<div class="card"><div class="card-title">${c.class_name} - ${r.subject}</div>
+                    <div class="card-info"><strong>Lesson:</strong> ${r.lesson}</div>
+                    ${r.notes ? `<div class="card-info"><strong>Notes:</strong> ${r.notes}</div>` : ''}
+                    <button class="btn-sm btn-edit" onclick="editDaily(${c.id}, ${r.id})">Edit</button>
+                    <button class="btn-sm btn-del" onclick="delDaily(${c.id}, ${r.id})">Delete</button></div>`
+                );
+            }).join('') || '<p>No reports today</p>';
+        }
+        
+        async function delDaily(cid, rid) {
+            if (!confirm('Delete?')) return;
+            try {
+                const c = CLS.find(x => x.id == cid);
+                const dr = JSON.parse(c.d_report || '[]').filter(r => r.id !== rid);
+                await saveDB(cid, 'd_report', dr);
+                c.d_report = JSON.stringify(dr);
+                loadDaily();
+                notify('✅ Deleted');
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
+        }
+        
+        function editDaily(cid, rid) {
+            const c = CLS.find(x => x.id == cid);
+            const r = JSON.parse(c.d_report || '[]').find(x => x.id === rid);
+            ED = { type: 'daily', cid, rid };
+            document.getElementById('mtitle').textContent = 'Edit Report';
+            document.getElementById('mbody').innerHTML = 
+                `<input type="text" id="ein1" value="${r.subject}" style="width:100%;padding:10px;margin-bottom:10px;">
+                <textarea id="ein2" rows="3" style="width:100%;padding:10px;margin-bottom:10px;">${r.lesson}</textarea>
+                <textarea id="ein3" rows="2" style="width:100%;padding:10px;">${r.notes||''}</textarea>`;
             document.getElementById('modal').style.display = 'block';
         }
         
