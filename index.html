@@ -6,1723 +6,670 @@
     <title>Class Management System</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow: hidden;
-        }
-        
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
-        
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-        }
-        
-        .current-date {
-            font-size: 1.2em;
-            opacity: 0.9;
-        }
-        
-        .nav-tabs {
-            display: flex;
-            background: #f8f9fa;
-            border-bottom: 2px solid #dee2e6;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        .nav-tab {
-            flex: 1;
-            min-width: 80px;
-            padding: 15px;
-            text-align: center;
-            cursor: pointer;
-            border: none;
-            background: transparent;
-            font-size: 1em;
-            font-weight: 600;
-            color: #495057;
-            transition: all 0.3s;
-            white-space: nowrap;
-        }
-        
-        .nav-tab:hover {
-            background: #e9ecef;
-        }
-        
-        .nav-tab.active {
-            background: white;
-            color: #667eea;
-            border-bottom: 3px solid #667eea;
-        }
-        
-        .content {
-            padding: 30px;
-        }
-        
-        .tab-content {
-            display: none;
-        }
-        
-        .tab-content.active {
-            display: block;
-            animation: fadeIn 0.5s;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #333;
-        }
-        
-        input, select, textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 1em;
-            transition: border 0.3s;
-        }
-        
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        
-        .btn {
-            padding: 12px 30px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-right: 10px;
-            margin-bottom: 10px;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-        
-        .btn-success {
-            background: #28a745;
-            color: white;
-        }
-        
-        .btn-info {
-            background: #17a2b8;
-            color: white;
-        }
-        
-        .class-list, .student-list, .assignment-list, .report-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-        
-        .class-card, .student-card, .assignment-card, .report-card {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            border-left: 4px solid #667eea;
-            transition: all 0.3s;
-        }
-        
-        .class-card:hover, .student-card:hover, .assignment-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        
-        .card-title {
-            font-size: 1.2em;
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 10px;
-        }
-        
-        .card-info {
-            color: #666;
-            font-size: 0.9em;
-        }
-        
-        .delete-btn {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 5px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 10px;
-            font-size: 0.9em;
-        }
-        
-        .edit-btn {
-            background: #ffc107;
-            color: #333;
-            border: none;
-            padding: 5px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 10px;
-            margin-right: 5px;
-            font-size: 0.9em;
-        }
-        
-        .whatsapp-btn {
-            background: #25D366;
-            color: white;
-            border: none;
-            padding: 5px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 10px;
-            margin-right: 5px;
-            font-size: 0.9em;
-        }
-        
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 3000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            animation: fadeIn 0.3s;
-        }
-        
-        .modal-content {
-            background-color: white;
-            margin: 5% auto;
-            padding: 30px;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 500px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            animation: slideUp 0.3s;
-        }
-        
-        @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .modal-header h2 {
-            margin: 0;
-            color: #667eea;
-        }
-        
-        .close {
-            font-size: 28px;
-            font-weight: bold;
-            color: #aaa;
-            cursor: pointer;
-        }
-        
-        .close:hover {
-            color: #000;
-        }
-        
-        .modal-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
-        .export-section {
-            background: #e7f3ff;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-            border-left: 4px solid #17a2b8;
-        }
-        
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            z-index: 2000;
-            max-width: 350px;
-            animation: slideIn 0.5s;
-        }
-        
-        @keyframes slideIn {
-            from { transform: translateX(400px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        
-        .notification-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        
-        .notification-title {
-            font-weight: 700;
-            color: #667eea;
-            font-size: 1.1em;
-        }
-        
-        .notification-close {
-            cursor: pointer;
-            font-size: 20px;
-            color: #999;
-        }
-        
-        .notification-body {
-            color: #333;
-            line-height: 1.6;
-        }
-        
-        .notification-actions {
-            margin-top: 15px;
-            display: flex;
-            gap: 10px;
-        }
-        
-        .report-section {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #667eea;
-            font-size: 1.2em;
-        }
-        
-        /* Mobile Responsive Styles */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 15px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 15px 15px 0 0; }
+        .header h1 { font-size: 2.5em; }
+        .nav-tabs { display: flex; background: #f8f9fa; border-bottom: 2px solid #dee2e6; overflow-x: auto; }
+        .nav-tab { flex: 1; padding: 15px; text-align: center; cursor: pointer; border: none; background: transparent; font-weight: 600; }
+        .nav-tab.active { background: white; color: #667eea; border-bottom: 3px solid #667eea; }
+        .content { padding: 30px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; }
+        input, select, textarea { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; }
+        .btn { padding: 12px 30px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin: 5px; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-info { background: #17a2b8; color: white; }
+        .btn-warning { background: #ffc107; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; margin-top: 20px; }
+        .card { background: #f8f9fa; padding: 20px; border-radius: 10px; border-left: 4px solid #667eea; }
+        .card-title { font-size: 1.2em; font-weight: 700; margin-bottom: 10px; }
+        .card-info { color: #666; margin: 5px 0; }
+        .btn-sm { padding: 5px 15px; border: none; border-radius: 5px; cursor: pointer; margin: 5px 5px 0 0; font-size: 0.9em; }
+        .btn-del { background: #dc3545; color: white; }
+        .btn-edit { background: #ffc107; }
+        .btn-wa { background: #25D366; color: white; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; }
+        .modal-content { background: white; margin: 5% auto; padding: 30px; border-radius: 15px; width: 90%; max-width: 500px; }
+        .close { float: right; font-size: 28px; cursor: pointer; }
+        .notify { position: fixed; top: 20px; right: 20px; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 2000; max-width: 350px; }
+        .pwd-box { background: #e7f3ff; padding: 10px; border-radius: 5px; font-family: monospace; display: flex; justify-content: space-between; align-items: center; margin: 10px 0; }
+        .msg-box { background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0; }
         @media (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
-            
-            .header {
-                padding: 20px 15px;
-            }
-            
-            .header h1 {
-                font-size: 1.8em;
-            }
-            
-            .current-date {
-                font-size: 1em;
-            }
-            
-            .nav-tab {
-                font-size: 0.9em;
-                padding: 12px 8px;
-                min-width: 70px;
-            }
-            
-            .content {
-                padding: 15px;
-            }
-            
-            .btn {
-                padding: 10px 20px;
-                font-size: 0.9em;
-                margin-right: 5px;
-                width: 100%;
-                margin-right: 0;
-            }
-            
-            .class-list, .student-list, .assignment-list, .report-list {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-            
-            .notification {
-                top: 10px;
-                right: 10px;
-                left: 10px;
-                max-width: none;
-                padding: 15px;
-            }
-            
-            .notification-actions {
-                flex-direction: column;
-            }
-            
-            .export-section {
-                padding: 15px;
-            }
-            
-            .card-title {
-                font-size: 1.1em;
-            }
-            
-            h2 {
-                font-size: 1.3em;
-            }
-            
-            h3 {
-                font-size: 1.1em;
-            }
-            
-            .modal-content {
-                width: 95%;
-                margin: 10% auto;
-                padding: 20px;
-            }
-            
-            .modal-actions {
-                flex-direction: column;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .header h1 {
-                font-size: 1.5em;
-            }
-            
-            .current-date {
-                font-size: 0.9em;
-            }
-            
-            .nav-tab {
-                font-size: 0.8em;
-                padding: 10px 5px;
-            }
+            .header h1 { font-size: 1.8em; }
+            .grid { grid-template-columns: 1fr; }
+            .btn { width: 100%; }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>Class Management System</h1>
-            <div class="current-date" id="currentDate"></div>
+            <h1>🎓 Class Management System</h1>
+            <div id="date"></div>
         </div>
         
         <div class="nav-tabs">
-            <button class="nav-tab active" onclick="showTab('classes')">Classes</button>
-            <button class="nav-tab" onclick="showTab('students')">Students</button>
-            <button class="nav-tab" onclick="showTab('assignments')">Assignments</button>
-            <button class="nav-tab" onclick="showTab('daily')">DR</button>
-            <button class="nav-tab" onclick="showTab('reports')">FR</button>
+            <button class="nav-tab active" onclick="showTab(0)">Classes</button>
+            <button class="nav-tab" onclick="showTab(1)">Passwords</button>
+            <button class="nav-tab" onclick="showTab(2)">Messages</button>
+            <button class="nav-tab" onclick="showTab(3)">Students</button>
+            <button class="nav-tab" onclick="showTab(4)">Assignments</button>
+            <button class="nav-tab" onclick="showTab(5)">Daily</button>
+            <button class="nav-tab" onclick="showTab(6)">Reports</button>
         </div>
         
         <div class="content">
-            <div id="classes" class="tab-content active">
+            <div id="t0" class="tab-content active">
                 <h2>Add New Class</h2>
-                <div class="form-group">
-                    <label>Class Name</label>
-                    <input type="text" id="className" placeholder="e.g., Grade 10 A">
-                </div>
-                <div class="form-group">
-                    <label>Teacher</label>
-                    <input type="text" id="classTeacher" placeholder="Teacher's Name">
-                </div>
+                <div class="form-group"><label>Class Name</label><input type="text" id="cname" placeholder="e.g., Grade 10 A"></div>
                 <button class="btn btn-primary" onclick="addClass()">Add Class</button>
-                
-                <h2 style="margin-top: 30px;">Existing Classes</h2>
-                <div class="class-list" id="classList"></div>
+                <h2 style="margin-top:30px;">Classes</h2>
+                <div class="grid" id="classList"></div>
             </div>
             
-            <div id="students" class="tab-content">
-                <h2>Student Management</h2>
-                <div class="form-group">
-                    <label>Select Class</label>
-                    <select id="studentClassSelect" onchange="loadStudents()"></select>
-                </div>
-                
-                <div id="studentForm" style="display: none;">
-                    <h3 style="margin-top: 20px;">Add New Student</h3>
-                    <div class="form-group">
-                        <label>Student Name</label>
-                        <input type="text" id="studentName" placeholder="Full Name">
-                    </div>
-                    <div class="form-group">
-                        <label>Phone Number</label>
-                        <input type="tel" id="studentPhone" placeholder="0771234567">
-                    </div>
-                    <button class="btn btn-primary" onclick="addStudent()">Add Student</button>
-                    
-                    <h3 style="margin-top: 30px;">Student List</h3>
-                    <div id="studentCount" style="margin: 10px 0; color: #666;"></div>
-                    <div class="student-list" id="studentList"></div>
+            <div id="t1" class="tab-content">
+                <h2>🔐 Passwords</h2>
+                <div class="form-group"><label>Class</label><select id="psel" onchange="loadPwd()"></select></div>
+                <div id="psec" style="display:none;">
+                    <div class="form-group"><label>Password</label><input type="text" id="pwd"></div>
+                    <button class="btn btn-success" onclick="setPwd()">Set</button>
+                    <button class="btn btn-warning" onclick="genPwd()">Generate</button>
+                    <div id="cpwd"></div>
                 </div>
             </div>
             
-            <div id="assignments" class="tab-content">
-                <h2>Assignment Management</h2>
-                <div class="form-group">
-                    <label>Select Class</label>
-                    <select id="assignmentClassSelect"></select>
+            <div id="t2" class="tab-content">
+                <h2>📢 Messages</h2>
+                <div class="form-group"><label>Class</label><select id="msel" onchange="loadMsg()"></select></div>
+                <div id="msec" style="display:none;">
+                    <div class="form-group"><label>Message</label><textarea id="msg" rows="4"></textarea></div>
+                    <button class="btn btn-primary" onclick="sendMsg()">Send</button>
+                    <h3 style="margin-top:30px;">History</h3>
+                    <div class="grid" id="msgList"></div>
                 </div>
-                <div class="form-group">
-                    <label>Assignment Title</label>
-                    <input type="text" id="assignmentTitle" placeholder="e.g., Mathematics Project">
-                </div>
-                <div class="form-group">
-                    <label>Description</label>
-                    <textarea id="assignmentDesc" rows="3" placeholder="Assignment details"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Due Date</label>
-                    <input type="date" id="assignmentDue">
-                </div>
-                <button class="btn btn-primary" onclick="addAssignment()">Add Assignment</button>
-                
-                <h2 style="margin-top: 30px;">Current Assignments</h2>
-                <div class="assignment-list" id="assignmentList"></div>
             </div>
             
-            <div id="daily" class="tab-content">
-                <h2>Daily Report</h2>
-                <div class="form-group">
-                    <label>Select Class</label>
-                    <select id="dailyClassSelect"></select>
+            <div id="t3" class="tab-content">
+                <h2>Students</h2>
+                <div class="form-group"><label>Class</label><select id="ssel" onchange="loadStd()"></select></div>
+                <div id="ssec" style="display:none;">
+                    <h3>Add Student</h3>
+                    <div class="form-group"><label>Name</label><input type="text" id="sname"></div>
+                    <div class="form-group"><label>Phone</label><input type="tel" id="sphone"></div>
+                    <button class="btn btn-primary" onclick="addStd()">Add</button>
+                    <h3 style="margin-top:30px;">Students <span id="scnt"></span></h3>
+                    <div class="grid" id="stdList"></div>
                 </div>
-                <div class="form-group">
-                    <label>Subject</label>
-                    <input type="text" id="dailySubject" placeholder="e.g., Mathematics">
-                </div>
-                <div class="form-group">
-                    <label>Lesson Taught</label>
-                    <textarea id="dailyLesson" rows="3" placeholder="Today's lesson details"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Notes</label>
-                    <textarea id="dailyNotes" rows="2" placeholder="Special notes"></textarea>
-                </div>
-                <button class="btn btn-primary" onclick="addDailyReport()">Save Report</button>
-                
-                <h2 style="margin-top: 30px;">Today's Reports</h2>
-                <div class="report-list" id="dailyReportList"></div>
             </div>
             
-            <div id="reports" class="tab-content">
-                <h2>Full Reports & Analysis</h2>
-                
-                <div class="export-section">
-                    <h3>📊 Excel Export</h3>
-                    <p>Export all data to Excel file</p>
-                    <button class="btn btn-success" onclick="exportToExcel()">📥 Export All Data</button>
-                    <button class="btn btn-info" onclick="exportClassReport()">📄 Export Class Report</button>
-                    <button class="btn btn-info" onclick="exportDailyReports()">📅 Export Daily Reports</button>
-                </div>
-                
-                <div class="report-section">
-                    <h3>Overall Statistics</h3>
-                    <p><strong>Total Classes:</strong> <span id="totalClasses">0</span></p>
-                    <p><strong>Total Students:</strong> <span id="totalStudents">0</span></p>
-                    <p><strong>Total Assignments:</strong> <span id="totalAssignments">0</span></p>
-                </div>
-                
-                <div class="form-group">
-                    <label>Report by Class</label>
-                    <select id="reportClassSelect" onchange="generateClassReport()"></select>
-                </div>
-                
-                <div id="classReportDetails"></div>
+            <div id="t4" class="tab-content">
+                <h2>Assignments</h2>
+                <div class="form-group"><label>Class</label><select id="asel"></select></div>
+                <div class="form-group"><label>Title</label><input type="text" id="atitle"></div>
+                <div class="form-group"><label>Description</label><textarea id="adesc" rows="3"></textarea></div>
+                <div class="form-group"><label>Due</label><input type="date" id="adue"></div>
+                <button class="btn btn-primary" onclick="addAsgn()">Add</button>
+                <h2 style="margin-top:30px;">Assignments</h2>
+                <div class="grid" id="asgnList"></div>
+            </div>
+            
+            <div id="t5" class="tab-content">
+                <h2>📝 Daily Reports</h2>
+                <div class="form-group"><label>Class</label><select id="dsel"></select></div>
+                <div class="form-group"><label>Subject</label><input type="text" id="dsub"></div>
+                <div class="form-group"><label>Lesson</label><textarea id="dless" rows="3"></textarea></div>
+                <div class="form-group"><label>Notes</label><textarea id="dnote" rows="2"></textarea></div>
+                <button class="btn btn-primary" onclick="addDaily()">Save</button>
+                <h2 style="margin-top:30px;">Today</h2>
+                <div class="grid" id="dailyList"></div>
+            </div>
+            
+            <div id="t6" class="tab-content">
+                <h2>Reports</h2>
+                <button class="btn btn-success" onclick="expAll()">📥 Export All</button>
+                <button class="btn btn-info" onclick="expClass()">📄 Class Report</button>
+                <button class="btn btn-info" onclick="expDaily()">📅 Daily Reports</button>
+                <div id="stats" style="margin-top:20px;"></div>
             </div>
         </div>
     </div>
     
-    <div id="notificationContainer"></div>
-    
-    <!-- Edit Modals -->
-    <div id="editClassModal" class="modal">
+    <div id="modal" class="modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h2>Edit Class</h2>
-                <span class="close" onclick="closeModal('editClassModal')">&times;</span>
-            </div>
-            <div class="form-group">
-                <label>Class Name</label>
-                <input type="text" id="editClassName">
-            </div>
-            <div class="form-group">
-                <label>Teacher</label>
-                <input type="text" id="editClassTeacher">
-            </div>
-            <div class="modal-actions">
-                <button class="btn btn-primary" onclick="saveClassEdit()">Save</button>
-                <button class="btn" style="background: #6c757d; color: white;" onclick="closeModal('editClassModal')">Cancel</button>
-            </div>
+            <span class="close" onclick="closeMod()">&times;</span>
+            <h2 id="mtitle"></h2>
+            <div id="mbody"></div>
+            <button class="btn btn-primary" onclick="saveEdit()">Save</button>
         </div>
     </div>
     
-    <div id="editStudentModal" class="modal">
+    <div id="wamodal" class="modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h2>Edit Student</h2>
-                <span class="close" onclick="closeModal('editStudentModal')">&times;</span>
-            </div>
-            <div class="form-group">
-                <label>Student Name</label>
-                <input type="text" id="editStudentName">
-            </div>
-            <div class="form-group">
-                <label>Phone Number</label>
-                <input type="tel" id="editStudentPhone">
-            </div>
-            <div class="modal-actions">
-                <button class="btn btn-primary" onclick="saveStudentEdit()">Save</button>
-                <button class="btn" style="background: #6c757d; color: white;" onclick="closeModal('editStudentModal')">Cancel</button>
-            </div>
+            <span class="close" onclick="closeMod('wa')">&times;</span>
+            <h2>WhatsApp</h2>
+            <textarea id="wamsg" rows="5" style="width:100%;padding:10px;"></textarea><br>
+            <button class="btn btn-success" onclick="sendWA()">Open WhatsApp</button>
         </div>
     </div>
     
-    <div id="editAssignmentModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Edit Assignment</h2>
-                <span class="close" onclick="closeModal('editAssignmentModal')">&times;</span>
-            </div>
-            <div class="form-group">
-                <label>Title</label>
-                <input type="text" id="editAssignmentTitle">
-            </div>
-            <div class="form-group">
-                <label>Description</label>
-                <textarea id="editAssignmentDesc" rows="3"></textarea>
-            </div>
-            <div class="form-group">
-                <label>Due Date</label>
-                <input type="date" id="editAssignmentDue">
-            </div>
-            <div class="modal-actions">
-                <button class="btn btn-primary" onclick="saveAssignmentEdit()">Save</button>
-                <button class="btn" style="background: #6c757d; color: white;" onclick="closeModal('editAssignmentModal')">Cancel</button>
-            </div>
-        </div>
-    </div>
-    
-    <div id="editDailyReportModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Edit Daily Report</h2>
-                <span class="close" onclick="closeModal('editDailyReportModal')">&times;</span>
-            </div>
-            <div class="form-group">
-                <label>Subject</label>
-                <input type="text" id="editReportSubject">
-            </div>
-            <div class="form-group">
-                <label>Lesson</label>
-                <textarea id="editReportLesson" rows="3"></textarea>
-            </div>
-            <div class="form-group">
-                <label>Notes</label>
-                <textarea id="editReportNotes" rows="2"></textarea>
-            </div>
-            <div class="modal-actions">
-                <button class="btn btn-primary" onclick="saveDailyReportEdit()">Save</button>
-                <button class="btn" style="background: #6c757d; color: white;" onclick="closeModal('editDailyReportModal')">Cancel</button>
-            </div>
-        </div>
-    </div>
-    
-    <div id="whatsappModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>WhatsApp Message</h2>
-                <span class="close" onclick="closeModal('whatsappModal')">&times;</span>
-            </div>
-            <div class="form-group">
-                <label>Message</label>
-                <textarea id="whatsappMessage" rows="5" placeholder="Type your message here..."></textarea>
-            </div>
-            <div class="modal-actions">
-                <button class="btn btn-success" onclick="sendWhatsApp()">Open WhatsApp</button>
-                <button class="btn" style="background: #6c757d; color: white;" onclick="closeModal('whatsappModal')">Cancel</button>
-            </div>
-        </div>
-    </div>
+    <div id="notif"></div>
 
     <script>
-        // Supabase Configuration
-        const SUPABASE_URL = 'https://uqgzlaxsnknheoerbfus.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxZ3psYXhzbmtuaGVvZXJiZnVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5MjM2MTUsImV4cCI6MjA3OTI4MzYxNX0.IYWZ7ukx8J-GJMWy7cMk2BWnmzJmJjjE93yEmJie7nQ';
+        const SB = window.supabase.createClient('https://uqgzlaxsnknheoerbfus.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxZ3psYXhzbmtuaGVvZXJiZnVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5MjM2MTUsImV4cCI6MjA3OTI4MzYxNX0.IYWZ7ukx8J-GJMWy7cMk2BWnmzJmJjjE93yEmJie7nQ');
+        const PWDS = ['Cat99', 'Dog55', 'Sun33', 'Moon7', 'Star4', 'Fish8', 'Bird2', 'Tree6'];
+        let CLS = [], ED = {}, WAP = '';
         
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        
-        // Data storage
-        let classes = [];
-        let students = {};
-        let assignments = [];
-        let dailyReports = [];
-        
-        // Edit variables
-        let currentEditId = null;
-        let currentEditClassId = null;
-        let currentEditIndex = null;
-        let currentWhatsAppPhone = null;
-        
-        // Load data from Database
-        async function loadDataFromDB() {
+        async function loadDB() {
             try {
-                const { data, error } = await supabase
-                    .from('class')
-                    .select('*')
-                    .order('id', { ascending: true });
-                
+                const { data, error } = await SB.from('class').select('*').order('id');
                 if (error) throw error;
-                
-                if (data && data.length > 0) {
-                    classes = data.map(row => ({
-                        id: row.id,
-                        name: row.class_name,
-                        teacher: row.teacher || 'Unknown',
-                        createdAt: row.created_at || new Date().toISOString()
-                    }));
-                    
-                    students = {};
-                    assignments = [];
-                    dailyReports = [];
-                    
-                    data.forEach(row => {
-                        if (row.student) {
-                            const studentData = typeof row.student === 'string' ? JSON.parse(row.student) : row.student;
-                            students[row.id] = Array.isArray(studentData) ? studentData : [];
-                        }
-                        
-                        if (row.tutes) {
-                            const tutesData = typeof row.tutes === 'string' ? JSON.parse(row.tutes) : row.tutes;
-                            if (Array.isArray(tutesData)) {
-                                assignments = [...assignments, ...tutesData];
-                            }
-                        }
-                        
-                        if (row.d_report) {
-                            const reportData = typeof row.d_report === 'string' ? JSON.parse(row.d_report) : row.d_report;
-                            if (Array.isArray(reportData)) {
-                                dailyReports = [...dailyReports, ...reportData];
-                            }
-                        }
-                    });
-                    
-                    localStorage.setItem('classes', JSON.stringify(classes));
-                    localStorage.setItem('students', JSON.stringify(students));
-                    localStorage.setItem('assignments', JSON.stringify(assignments));
-                    localStorage.setItem('dailyReports', JSON.stringify(dailyReports));
-                    
-                    loadClasses();
-                    showNotification('Success', 'Data loaded from database!');
-                } else {
-                    loadClasses();
-                }
-            } catch (error) {
-                console.error('Database load error:', error);
-                classes = JSON.parse(localStorage.getItem('classes')) || [];
-                students = JSON.parse(localStorage.getItem('students')) || {};
-                assignments = JSON.parse(localStorage.getItem('assignments')) || [];
-                dailyReports = JSON.parse(localStorage.getItem('dailyReports')) || [];
-                loadClasses();
-                showNotification('Error', 'No database connection. Using local data.');
+                CLS = data || [];
+                updSel();
+                loadCls();
+                notify('✅ Data loaded');
+            } catch (e) {
+                notify('❌ DB Error: ' + e.message);
             }
         }
         
-        // Save class to Database
-        async function saveClassToDB(classData) {
-            const { data, error } = await supabase
-                .from('class')
-                .insert([{
-                    class_name: classData.name,
-                    teacher: classData.teacher,
-                    student: JSON.stringify([]),
-                    tutes: JSON.stringify([]),
-                    d_report: JSON.stringify([]),
-                    m_report: JSON.stringify([])
-                }])
-                .select();
-            
-            if (error) throw error;
-            return data[0];
+        async function saveDB(id, field, val) {
+            const upd = {}; upd[field] = JSON.stringify(val);
+            await SB.from('class').update(upd).eq('id', id);
         }
         
-        // Update class in Database
-        async function updateClassInDB(classId, field, value) {
-            const updateData = {};
-            updateData[field] = JSON.stringify(value);
-            
-            const { error } = await supabase
-                .from('class')
-                .update(updateData)
-                .eq('id', classId);
-            
-            if (error) throw error;
+        async function delDB(id) {
+            await SB.from('class').delete().eq('id', id);
         }
         
-        // Delete class from Database
-        async function deleteClassFromDB(classId) {
-            const { error } = await supabase
-                .from('class')
-                .delete()
-                .eq('id', classId);
-            
-            if (error) throw error;
+        function notify(msg) {
+            const id = 'n' + Date.now();
+            document.getElementById('notif').innerHTML += `<div id="${id}" class="notify"><div style="display:flex;justify-content:space-between;"><strong>${msg}</strong><span style="cursor:pointer;" onclick="this.parentElement.parentElement.remove()">×</span></div></div>`;
+            setTimeout(() => document.getElementById(id)?.remove(), 3000);
         }
         
-        // Notification system
-        function showNotification(title, message, actions = []) {
-            const container = document.getElementById('notificationContainer');
-            const notifId = 'notif_' + Date.now();
-            
-            const actionsHtml = actions.map(action => 
-                `<button class="btn btn-${action.type}" onclick="${action.onclick}; closeNotification('${notifId}')">${action.text}</button>`
-            ).join('');
-            
-            const notifHtml = `
-                <div id="${notifId}" class="notification">
-                    <div class="notification-header">
-                        <div class="notification-title">🔔 ${title}</div>
-                        <div class="notification-close" onclick="closeNotification('${notifId}')">×</div>
-                    </div>
-                    <div class="notification-body">${message}</div>
-                    ${actionsHtml ? `<div class="notification-actions">${actionsHtml}</div>` : ''}
-                </div>
-            `;
-            
-            container.innerHTML += notifHtml;
-            
-            if (actions.length === 0) {
-                setTimeout(() => closeNotification(notifId), 10000);
-            }
+        function showTab(n) {
+            document.querySelectorAll('.tab-content,.nav-tab').forEach(e => e.classList.remove('active'));
+            document.getElementById('t'+n).classList.add('active');
+            document.querySelectorAll('.nav-tab')[n].classList.add('active');
+            if (n === 6) updStats();
         }
         
-        function closeNotification(id) {
-            const notif = document.getElementById(id);
-            if (notif) {
-                notif.style.animation = 'slideIn 0.3s reverse';
-                setTimeout(() => notif.remove(), 300);
-            }
-        }
-        
-        // Daily Reminders
-        function checkDailyReminders() {
-            const now = new Date();
-            const hours = now.getHours();
-            const minutes = now.getMinutes();
-            const today = now.toISOString().split('T')[0];
-            
-            const lastReminder = localStorage.getItem('lastDailyReminder');
-            
-            if (hours === 18 && minutes === 0 && lastReminder !== today + '_18') {
-                showNotification(
-                    'Daily Report Reminder',
-                    'Time to write today\'s daily report! Update your class reports.',
-                    [
-                        { text: 'Write Report', type: 'primary', onclick: "showTab('daily')" }
-                    ]
-                );
-                localStorage.setItem('lastDailyReminder', today + '_18');
-            }
-            
-            if (hours === 21 && minutes === 0 && lastReminder !== today + '_21') {
-                const todayReports = dailyReports.filter(r => r.date === today);
-                if (todayReports.length === 0) {
-                    showNotification(
-                        'Final Daily Report Reminder',
-                        'You haven\'t written a daily report for today yet. Please complete the report.',
-                        [
-                            { text: 'Write Now', type: 'primary', onclick: "showTab('daily')" }
-                        ]
-                    );
-                }
-                localStorage.setItem('lastDailyReminder', today + '_21');
-            }
-        }
-        
-        // Weekly reminder
-        function checkWeeklyReminder() {
-            const now = new Date();
-            const dayOfWeek = now.getDay();
-            const lastWeeklyReminder = localStorage.getItem('lastWeeklyReminder');
-            const today = now.toISOString().split('T')[0];
-            
-            if (dayOfWeek === 0 && now.getHours() === 10 && now.getMinutes() === 0 && lastWeeklyReminder !== today) {
-                const oldReportsCount = dailyReports.filter(r => {
-                    const reportDate = new Date(r.date);
-                    const weekAgo = new Date();
-                    weekAgo.setDate(weekAgo.getDate() - 7);
-                    return reportDate < weekAgo;
-                }).length;
-                
-                if (oldReportsCount > 0) {
-                    showNotification(
-                        'Weekly Data Management',
-                        `You have ${oldReportsCount} reports older than a week. Consider exporting and deleting old data.`,
-                        [
-                            { text: 'Export Reports', type: 'success', onclick: "exportDailyReports()" },
-                            { text: 'Delete Old Reports', type: 'danger', onclick: "deleteOldReports()" }
-                        ]
-                    );
-                }
-                localStorage.setItem('lastWeeklyReminder', today);
-            }
-        }
-        
-        // Delete old reports
-        function deleteOldReports() {
-            const weekAgo = new Date();
-            weekAgo.setDate(weekAgo.getDate() - 7);
-            
-            const oldCount = dailyReports.length;
-            dailyReports = dailyReports.filter(r => {
-                const reportDate = new Date(r.date);
-                return reportDate >= weekAgo;
+        function updSel() {
+            ['psel','msel','ssel','asel','dsel'].forEach(id => {
+                const sel = document.getElementById(id);
+                sel.innerHTML = '<option value="">Select</option>' + CLS.map(c => `<option value="${c.id}">${c.class_name}</option>`).join('');
             });
-            
-            const deletedCount = oldCount - dailyReports.length;
-            localStorage.setItem('dailyReports', JSON.stringify(dailyReports));
-            
-            alert(`Deleted ${deletedCount} reports older than a week.`);
-            loadTodayReports();
         }
         
-        setInterval(() => {
-            checkDailyReminders();
-            checkWeeklyReminder();
-        }, 60000);
-        
-        setTimeout(() => {
-            checkDailyReminders();
-            checkWeeklyReminder();
-        }, 5000);
-        
-        // Update date
-        function updateDate() {
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            const date = new Date().toLocaleDateString('en-US', options);
-            document.getElementById('currentDate').textContent = date;
-        }
-        
-        // Switch tabs
-        function showTab(tabName) {
-            const tabs = document.querySelectorAll('.tab-content');
-            const navTabs = document.querySelectorAll('.nav-tab');
-            
-            tabs.forEach(tab => tab.classList.remove('active'));
-            navTabs.forEach(nav => nav.classList.remove('active'));
-            
-            document.getElementById(tabName).classList.add('active');
-            
-            navTabs.forEach(nav => {
-                if (nav.textContent.includes(tabName === 'classes' ? 'Classes' : 
-                   tabName === 'students' ? 'Students' :
-                   tabName === 'assignments' ? 'Assignments' :
-                   tabName === 'daily' ? 'DR' : 'FR')) {
-                    nav.classList.add('active');
-                }
-            });
-            
-            if (tabName === 'students') {
-                updateStudentClassSelect();
-            } else if (tabName === 'assignments') {
-                updateAssignmentClassSelect();
-            } else if (tabName === 'daily') {
-                updateDailyClassSelect();
-                loadTodayReports();
-            } else if (tabName === 'reports') {
-                updateReportClassSelect();
-                updateOverallStats();
-            }
-        }
-        
-        // Add class
         async function addClass() {
-            const name = document.getElementById('className').value.trim();
-            const teacher = document.getElementById('classTeacher').value.trim();
-            
-            if (!name) {
-                alert('Please enter class name');
-                return;
-            }
-            
-            if (classes.length >= 30) {
-                alert('Maximum 30 classes already added');
-                return;
-            }
-            
+            const name = document.getElementById('cname').value.trim();
+            if (!name) return alert('Enter name');
             try {
-                const newClass = {
-                    name: name,
-                    teacher: teacher || 'Unknown',
-                    createdAt: new Date().toISOString()
-                };
-                
-                const savedClass = await saveClassToDB(newClass);
-                
-                newClass.id = savedClass.id;
-                classes.push(newClass);
-                students[savedClass.id] = [];
-                
-                localStorage.setItem('classes', JSON.stringify(classes));
-                localStorage.setItem('students', JSON.stringify(students));
-                
-                document.getElementById('className').value = '';
-                document.getElementById('classTeacher').value = '';
-                
-                loadClasses();
-                showNotification('Success', 'Class saved to database!');
-            } catch (error) {
-                alert('Database error: ' + error.message);
+                const { data } = await SB.from('class').insert([{class_name: name, passcode: '', student: '[]', tutes: '[]', d_report: '[]', message: '[]', m_report: '[]'}]).select();
+                CLS.push(data[0]);
+                document.getElementById('cname').value = '';
+                updSel();
+                loadCls();
+                notify('✅ Class added');
+            } catch (e) {
+                alert('Error: ' + e.message);
             }
         }
         
-        // Load classes
-        function loadClasses() {
-            const container = document.getElementById('classList');
-            container.innerHTML = '';
-            
-            classes.forEach(cls => {
-                const studentCount = students[cls.id] ? students[cls.id].length : 0;
-                const div = document.createElement('div');
-                div.className = 'class-card';
-                div.innerHTML = `
-                    <div class="card-title">${cls.name}</div>
-                    <div class="card-info">Teacher: ${cls.teacher}</div>
-                    <div class="card-info">Students: ${studentCount}/50</div>
-                    <button class="edit-btn" onclick="editClass(${cls.id})">Edit</button>
-                    <button class="delete-btn" onclick="deleteClass(${cls.id})">Delete</button>
-                `;
-                container.appendChild(div);
-            });
+        function loadCls() {
+            document.getElementById('classList').innerHTML = CLS.map(c => {
+                const st = JSON.parse(c.student || '[]');
+                return `<div class="card"><div class="card-title">${c.class_name}</div>
+                    <div class="card-info">Students: ${st.length}</div>
+                    <div class="card-info">Password: ${c.passcode ? '✅' : '❌'}</div>
+                    <button class="btn-sm btn-edit" onclick="editCls(${c.id})">Edit</button>
+                    <button class="btn-sm btn-del" onclick="delCls(${c.id})">Delete</button></div>`;
+            }).join('');
         }
         
-        // Delete class
-        async function deleteClass(id) {
-            if (confirm('Do you want to delete this class?')) {
-                try {
-                    await deleteClassFromDB(id);
-                    
-                    classes = classes.filter(c => c.id !== id);
-                    delete students[id];
-                    
-                    localStorage.setItem('classes', JSON.stringify(classes));
-                    localStorage.setItem('students', JSON.stringify(students));
-                    
-                    loadClasses();
-                    showNotification('Success', 'Class deleted from database!');
-                } catch (error) {
-                    alert('Database error: ' + error.message);
-                }
-            }
-        }
-        
-        // Update student class select
-        function updateStudentClassSelect() {
-            const select = document.getElementById('studentClassSelect');
-            select.innerHTML = '<option value="">Select a class</option>';
-            
-            classes.forEach(cls => {
-                const option = document.createElement('option');
-                option.value = cls.id;
-                option.textContent = cls.name;
-                select.appendChild(option);
-            });
-        }
-        
-        // Load students
-        function loadStudents() {
-            const classId = document.getElementById('studentClassSelect').value;
-            const form = document.getElementById('studentForm');
-            const container = document.getElementById('studentList');
-            const countDiv = document.getElementById('studentCount');
-            
-            if (!classId) {
-                form.style.display = 'none';
-                return;
-            }
-            
-            form.style.display = 'block';
-            container.innerHTML = '';
-            
-            const classStudents = students[classId] || [];
-            countDiv.textContent = `Student Count: ${classStudents.length}/50`;
-            
-            classStudents.forEach((student, index) => {
-                const div = document.createElement('div');
-                div.className = 'student-card';
-                div.innerHTML = `
-                    <div class="card-title">${student.name}</div>
-                    <div class="card-info">Phone: ${student.phone}</div>
-                    <button class="whatsapp-btn" onclick="openWhatsApp('${student.phone}')">📱 WhatsApp</button>
-                    <button class="edit-btn" onclick="editStudent(${classId}, ${index})">Edit</button>
-                    <button class="delete-btn" onclick="deleteStudent(${classId}, ${index})">Delete</button>
-                `;
-                container.appendChild(div);
-            });
-        }
-        
-        // Add student
-        async function addStudent() {
-            const classId = document.getElementById('studentClassSelect').value;
-            const name = document.getElementById('studentName').value.trim();
-            const phone = document.getElementById('studentPhone').value.trim();
-            
-            if (!classId) {
-                alert('Please select a class');
-                return;
-            }
-            
-            if (!name || !phone) {
-                alert('Please fill all information');
-                return;
-            }
-            
-            if (!students[classId]) {
-                students[classId] = [];
-            }
-            
-            if (students[classId].length >= 50) {
-                alert('Maximum 50 students already added to this class');
-                return;
-            }
-            
+        async function delCls(id) {
+            if (!confirm('Delete?')) return;
             try {
-                students[classId].push({
-                    name: name,
-                    phone: phone,
-                    addedAt: new Date().toISOString()
-                });
-                
-                await updateClassInDB(classId, 'student', students[classId]);
-                
-                localStorage.setItem('students', JSON.stringify(students));
-                
-                document.getElementById('studentName').value = '';
-                document.getElementById('studentPhone').value = '';
-                
-                loadStudents();
-                loadClasses();
-                showNotification('Success', 'Student saved to database!');
-            } catch (error) {
-                alert('Database error: ' + error.message);
+                await delDB(id);
+                CLS = CLS.filter(c => c.id !== id);
+                updSel();
+                loadCls();
+                notify('✅ Deleted');
+            } catch (e) {
+                alert('Error: ' + e.message);
             }
         }
         
-        // Delete student
-        async function deleteStudent(classId, index) {
-            if (confirm('Do you want to delete this student?')) {
-                try {
-                    students[classId].splice(index, 1);
-                    
-                    await updateClassInDB(classId, 'student', students[classId]);
-                    
-                    localStorage.setItem('students', JSON.stringify(students));
-                    loadStudents();
-                    loadClasses();
-                    showNotification('Success', 'Student deleted from database!');
-                } catch (error) {
-                    alert('Database error: ' + error.message);
-                }
-            }
+        function editCls(id) {
+            const c = CLS.find(x => x.id === id);
+            ED = { type: 'cls', id };
+            document.getElementById('mtitle').textContent = 'Edit Class';
+            document.getElementById('mbody').innerHTML = `<input type="text" id="ein" value="${c.class_name}" style="width:100%;padding:10px;">`;
+            document.getElementById('modal').style.display = 'block';
         }
         
-        // Update assignment class select
-        function updateAssignmentClassSelect() {
-            const select = document.getElementById('assignmentClassSelect');
-            select.innerHTML = '<option value="">Select a class</option>';
-            
-            classes.forEach(cls => {
-                const option = document.createElement('option');
-                option.value = cls.id;
-                option.textContent = cls.name;
-                select.appendChild(option);
-            });
-            
-            loadAssignments();
+        function loadPwd() {
+            const id = document.getElementById('psel').value;
+            const sec = document.getElementById('psec');
+            if (!id) { sec.style.display = 'none'; return; }
+            sec.style.display = 'block';
+            const c = CLS.find(x => x.id == id);
+            document.getElementById('cpwd').innerHTML = c.passcode ? 
+                `<div class="pwd-box"><strong>${c.passcode}</strong><button class="btn-sm btn-info" onclick="copyTxt('${c.passcode}')">📋</button></div>` :
+                '<p style="color:#999;">No password</p>';
         }
         
-        // Add assignment
-        async function addAssignment() {
-            const classId = document.getElementById('assignmentClassSelect').value;
-            const title = document.getElementById('assignmentTitle').value.trim();
-            const desc = document.getElementById('assignmentDesc').value.trim();
-            const due = document.getElementById('assignmentDue').value;
-            
-            if (!classId || !title || !due) {
-                alert('Please fill all required information');
-                return;
-            }
-            
+        function genPwd() {
+            document.getElementById('pwd').value = PWDS[Math.floor(Math.random() * PWDS.length)];
+        }
+        
+        async function setPwd() {
+            const id = document.getElementById('psel').value;
+            const pwd = document.getElementById('pwd').value.trim();
+            if (!id || !pwd) return alert('Select class & enter password');
             try {
-                const assignment = {
-                    id: Date.now(),
-                    classId: parseInt(classId),
-                    title: title,
-                    description: desc,
-                    dueDate: due,
-                    createdAt: new Date().toISOString()
-                };
-                
-                assignments.push(assignment);
-                
-                const classAssignments = assignments.filter(a => a.classId === parseInt(classId));
-                await updateClassInDB(classId, 'tutes', classAssignments);
-                
-                localStorage.setItem('assignments', JSON.stringify(assignments));
-                
-                document.getElementById('assignmentTitle').value = '';
-                document.getElementById('assignmentDesc').value = '';
-                document.getElementById('assignmentDue').value = '';
-                
-                loadAssignments();
-                showNotification('Success', 'Assignment saved to database!');
-            } catch (error) {
-                alert('Database error: ' + error.message);
+                await SB.from('class').update({ passcode: pwd }).eq('id', id);
+                CLS.find(c => c.id == id).passcode = pwd;
+                document.getElementById('pwd').value = '';
+                loadPwd();
+                loadCls();
+                notify('✅ Password set');
+            } catch (e) {
+                alert('Error: ' + e.message);
             }
         }
         
-        // Load assignments
-        function loadAssignments() {
-            const container = document.getElementById('assignmentList');
-            container.innerHTML = '';
-            
-            assignments.forEach(assign => {
-                const cls = classes.find(c => c.id === assign.classId);
-                if (!cls) return;
-                
-                const div = document.createElement('div');
-                div.className = 'assignment-card';
-                div.innerHTML = `
-                    <div class="card-title">${assign.title}</div>
-                    <div class="card-info">Class: ${cls.name}</div>
-                    <div class="card-info">Due Date: ${assign.dueDate}</div>
-                    <div class="card-info">${assign.description || ''}</div>
-                    <button class="edit-btn" onclick="editAssignment(${assign.id})">Edit</button>
-                    <button class="delete-btn" onclick="deleteAssignment(${assign.id})">Delete</button>
-                `;
-                container.appendChild(div);
-            });
+        function loadMsg() {
+            const id = document.getElementById('msel').value;
+            const sec = document.getElementById('msec');
+            if (!id) { sec.style.display = 'none'; return; }
+            sec.style.display = 'block';
+            const c = CLS.find(x => x.id == id);
+            const msgs = JSON.parse(c.message || '[]').sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+            document.getElementById('msgList').innerHTML = msgs.length ? msgs.map(m => 
+                `<div class="card"><div class="msg-box">${m.content}</div>
+                <div class="card-info">📅 ${new Date(m.createdAt).toLocaleString()}</div>
+                <button class="btn-sm btn-del" onclick="delMsg(${id}, '${m.createdAt}')">Delete</button></div>`
+            ).join('') : '<p>No messages</p>';
         }
         
-        // Delete assignment
-        async function deleteAssignment(id) {
-            if (confirm('Do you want to delete this assignment?')) {
-                try {
-                    const assignment = assignments.find(a => a.id === id);
-                    if (!assignment) return;
-                    
-                    assignments = assignments.filter(a => a.id !== id);
-                    
-                    const classAssignments = assignments.filter(a => a.classId === assignment.classId);
-                    await updateClassInDB(assignment.classId, 'tutes', classAssignments);
-                    
-                    localStorage.setItem('assignments', JSON.stringify(assignments));
-                    loadAssignments();
-                    showNotification('Success', 'Assignment deleted from database!');
-                } catch (error) {
-                    alert('Database error: ' + error.message);
-                }
-            }
-        }
-        
-        // Update daily class select
-        function updateDailyClassSelect() {
-            const select = document.getElementById('dailyClassSelect');
-            select.innerHTML = '<option value="">Select a class</option>';
-            
-            classes.forEach(cls => {
-                const option = document.createElement('option');
-                option.value = cls.id;
-                option.textContent = cls.name;
-                select.appendChild(option);
-            });
-        }
-        
-        // Add daily report
-        async function addDailyReport() {
-            const classId = document.getElementById('dailyClassSelect').value;
-            const subject = document.getElementById('dailySubject').value.trim();
-            const lesson = document.getElementById('dailyLesson').value.trim();
-            const notes = document.getElementById('dailyNotes').value.trim();
-            
-            if (!classId || !subject || !lesson) {
-                alert('Please fill all required information');
-                return;
-            }
-            
+        async function sendMsg() {
+            const id = document.getElementById('msel').value;
+            const msg = document.getElementById('msg').value.trim();
+            if (!id || !msg) return alert('Select class & type message');
             try {
-                const report = {
-                    id: Date.now(),
-                    classId: parseInt(classId),
-                    subject: subject,
-                    lesson: lesson,
-                    notes: notes,
-                    date: new Date().toISOString().split('T')[0],
-                    createdAt: new Date().toISOString()
-                };
-                
-                dailyReports.push(report);
-                
-                const classReports = dailyReports.filter(r => r.classId === parseInt(classId));
-                await updateClassInDB(classId, 'd_report', classReports);
-                
-                localStorage.setItem('dailyReports', JSON.stringify(dailyReports));
-                
-                document.getElementById('dailySubject').value = '';
-                document.getElementById('dailyLesson').value = '';
-                document.getElementById('dailyNotes').value = '';
-                
-                loadTodayReports();
-                showNotification('Success', 'Daily report saved to database!');
-            } catch (error) {
-                alert('Database error: ' + error.message);
+                const c = CLS.find(x => x.id == id);
+                const msgs = JSON.parse(c.message || '[]');
+                msgs.push({ content: msg, createdAt: new Date().toISOString(), type: 'teacher' });
+                await saveDB(id, 'message', msgs);
+                c.message = JSON.stringify(msgs);
+                document.getElementById('msg').value = '';
+                loadMsg();
+                notify('✅ Sent');
+            } catch (e) {
+                alert('Error: ' + e.message);
             }
         }
         
-        // Load today's reports
-        function loadTodayReports() {
-            const container = document.getElementById('dailyReportList');
+        async function delMsg(id, ts) {
+            if (!confirm('Delete?')) return;
+            try {
+                const c = CLS.find(x => x.id == id);
+                const msgs = JSON.parse(c.message || '[]').filter(m => m.createdAt !== ts);
+                await saveDB(id, 'message', msgs);
+                c.message = JSON.stringify(msgs);
+                loadMsg();
+                notify('✅ Deleted');
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
+        }
+        
+        function loadStd() {
+            const id = document.getElementById('ssel').value;
+            const sec = document.getElementById('ssec');
+            if (!id) { sec.style.display = 'none'; return; }
+            sec.style.display = 'block';
+            const c = CLS.find(x => x.id == id);
+            const st = JSON.parse(c.student || '[]');
+            document.getElementById('scnt').textContent = `(${st.length}/50)`;
+            document.getElementById('stdList').innerHTML = st.map((s, i) => 
+                `<div class="card"><div class="card-title">${s.name}</div>
+                <div class="card-info">📱 ${s.phone}</div>
+                <button class="btn-sm btn-wa" onclick="openWA('${s.phone}')">WhatsApp</button>
+                <button class="btn-sm btn-edit" onclick="editStd(${id}, ${i})">Edit</button>
+                <button class="btn-sm btn-del" onclick="delStd(${id}, ${i})">Delete</button></div>`
+            ).join('');
+        }
+        
+        async function addStd() {
+            const id = document.getElementById('ssel').value;
+            const name = document.getElementById('sname').value.trim();
+            const phone = document.getElementById('sphone').value.trim();
+            if (!id || !name || !phone) return alert('Fill all');
+            try {
+                const c = CLS.find(x => x.id == id);
+                const st = JSON.parse(c.student || '[]');
+                if (st.length >= 50) return alert('Max 50');
+                st.push({ name, phone });
+                await saveDB(id, 'student', st);
+                c.student = JSON.stringify(st);
+                document.getElementById('sname').value = '';
+                document.getElementById('sphone').value = '';
+                loadStd();
+                loadCls();
+                notify('✅ Added');
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
+        }
+        
+        async function delStd(id, i) {
+            if (!confirm('Delete?')) return;
+            try {
+                const c = CLS.find(x => x.id == id);
+                const st = JSON.parse(c.student || '[]');
+                st.splice(i, 1);
+                await saveDB(id, 'student', st);
+                c.student = JSON.stringify(st);
+                loadStd();
+                loadCls();
+                notify('✅ Deleted');
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
+        }
+        
+        function editStd(id, i) {
+            const c = CLS.find(x => x.id == id);
+            const s = JSON.parse(c.student || '[]')[i];
+            ED = { type: 'std', id, i };
+            document.getElementById('mtitle').textContent = 'Edit Student';
+            document.getElementById('mbody').innerHTML = 
+                `<input type="text" id="ein1" value="${s.name}" style="width:100%;padding:10px;margin-bottom:10px;">
+                <input type="tel" id="ein2" value="${s.phone}" style="width:100%;padding:10px;">`;
+            document.getElementById('modal').style.display = 'block';
+        }
+        
+        async function addAsgn() {
+            const id = document.getElementById('asel').value;
+            const title = document.getElementById('atitle').value.trim();
+            const desc = document.getElementById('adesc').value.trim();
+            const due = document.getElementById('adue').value;
+            if (!id || !title || !due) return alert('Fill required');
+            try {
+                const c = CLS.find(x => x.id == id);
+                const as = JSON.parse(c.tutes || '[]');
+                as.push({ id: Date.now(), title, description: desc, dueDate: due });
+                await saveDB(id, 'tutes', as);
+                c.tutes = JSON.stringify(as);
+                document.getElementById('atitle').value = '';
+                document.getElementById('adesc').value = '';
+                document.getElementById('adue').value = '';
+                loadAsgn();
+                notify('✅ Added');
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
+        }
+        
+        function loadAsgn() {
+            document.getElementById('asgnList').innerHTML = CLS.flatMap(c => {
+                const as = JSON.parse(c.tutes || '[]');
+                return as.map(a => 
+                    `<div class="card"><div class="card-title">${a.title}</div>
+                    <div class="card-info">Class: ${c.class_name}</div>
+                    <div class="card-info">Due: ${a.dueDate}</div>
+                    <div class="card-info">${a.description||''}</div>
+                    <button class="btn-sm btn-edit" onclick="editAsgn(${c.id}, ${a.id})">Edit</button>
+                    <button class="btn-sm btn-del" onclick="delAsgn(${c.id}, ${a.id})">Delete</button></div>`
+                );
+            }).join('');
+        }
+        
+        async function delAsgn(cid, aid) {
+            if (!confirm('Delete?')) return;
+            try {
+                const c = CLS.find(x => x.id == cid);
+                const as = JSON.parse(c.tutes || '[]').filter(a => a.id !== aid);
+                await saveDB(cid, 'tutes', as);
+                c.tutes = JSON.stringify(as);
+                loadAsgn();
+                notify('✅ Deleted');
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
+        }
+        
+        function editAsgn(cid, aid) {
+            const c = CLS.find(x => x.id == cid);
+            const a = JSON.parse(c.tutes || '[]').find(x => x.id === aid);
+            ED = { type: 'asgn', cid, aid };
+            document.getElementById('mtitle').textContent = 'Edit Assignment';
+            document.getElementById('mbody').innerHTML = 
+                `<input type="text" id="ein1" value="${a.title}" style="width:100%;padding:10px;margin-bottom:10px;">
+                <textarea id="ein2" rows="3" style="width:100%;padding:10px;margin-bottom:10px;">${a.description||''}</textarea>
+                <input type="date" id="ein3" value="${a.dueDate}" style="width:100%;padding:10px;">`;
+            document.getElementById('modal').style.display = 'block';
+        }
+        
+        async function addDaily() {
+            const id = document.getElementById('dsel').value;
+            const sub = document.getElementById('dsub').value.trim();
+            const less = document.getElementById('dless').value.trim();
+            const note = document.getElementById('dnote').value.trim();
+            if (!id || !sub || !less) return alert('Fill required');
+            try {
+                const c = CLS.find(x => x.id == id);
+                const dr = JSON.parse(c.d_report || '[]');
+                dr.push({ id: Date.now(), subject: sub, lesson: less, notes: note, date: new Date().toISOString().split('T')[0] });
+                await saveDB(id, 'd_report', dr);
+                c.d_report = JSON.stringify(dr);
+                document.getElementById('dsub').value = '';
+                document.getElementById('dless').value = '';
+                document.getElementById('dnote').value = '';
+                loadDaily();
+                notify('✅ Saved');
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
+        }
+        
+        function loadDaily() {
             const today = new Date().toISOString().split('T')[0];
-            container.innerHTML = '';
-            
-            const todayReports = dailyReports.filter(r => r.date === today);
-            
-            todayReports.forEach(report => {
-                const cls = classes.find(c => c.id === report.classId);
-                if (!cls) return;
-                
-                const div = document.createElement('div');
-                div.className = 'report-card';
-                div.innerHTML = `
-                    <div class="card-title">${cls.name} - ${report.subject}</div>
-                    <div class="card-info"><strong>Lesson:</strong> ${report.lesson}</div>
-                    ${report.notes ? `<div class="card-info"><strong>Notes:</strong> ${report.notes}</div>` : ''}
-                    <button class="edit-btn" onclick="editDailyReport(${report.id})">Edit</button>
-                    <button class="delete-btn" onclick="deleteDailyReport(${report.id})">Delete</button>
-                `;
-                container.appendChild(div);
-            });
-            
-            if (todayReports.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #666;">No reports today</p>';
+            document.getElementById('dailyList').innerHTML = CLS.flatMap(c => {
+                const dr = JSON.parse(c.d_report || '[]').filter(r => r.date === today);
+                return dr.map(r => 
+                    `<div class="card"><div class="card-title">${c.class_name} - ${r.subject}</div>
+                    <div class="card-info"><strong>Lesson:</strong> ${r.lesson}</div>
+                    ${r.notes ? `<div class="card-info"><strong>Notes:</strong> ${r.notes}</div>` : ''}
+                    <button class="btn-sm btn-edit" onclick="editDaily(${c.id}, ${r.id})">Edit</button>
+                    <button class="btn-sm btn-del" onclick="delDaily(${c.id}, ${r.id})">Delete</button></div>`
+                );
+            }).join('') || '<p>No reports today</p>';
+        }
+        
+        async function delDaily(cid, rid) {
+            if (!confirm('Delete?')) return;
+            try {
+                const c = CLS.find(x => x.id == cid);
+                const dr = JSON.parse(c.d_report || '[]').filter(r => r.id !== rid);
+                await saveDB(cid, 'd_report', dr);
+                c.d_report = JSON.stringify(dr);
+                loadDaily();
+                notify('✅ Deleted');
+            } catch (e) {
+                alert('Error: ' + e.message);
             }
         }
         
-        // Delete daily report
-        async function deleteDailyReport(id) {
-            if (confirm('Do you want to delete this report?')) {
-                try {
-                    const report = dailyReports.find(r => r.id === id);
-                    if (!report) return;
-                    
-                    dailyReports = dailyReports.filter(r => r.id !== id);
-                    
-                    const classReports = dailyReports.filter(r => r.classId === report.classId);
-                    await updateClassInDB(report.classId, 'd_report', classReports);
-                    
-                    localStorage.setItem('dailyReports', JSON.stringify(dailyReports));
-                    loadTodayReports();
-                    showNotification('Success', 'Report deleted from database!');
-                } catch (error) {
-                    alert('Database error: ' + error.message);
+        function editDaily(cid, rid) {
+            const c = CLS.find(x => x.id == cid);
+            const r = JSON.parse(c.d_report || '[]').find(x => x.id === rid);
+            ED = { type: 'daily', cid, rid };
+            document.getElementById('mtitle').textContent = 'Edit Report';
+            document.getElementById('mbody').innerHTML = 
+                `<input type="text" id="ein1" value="${r.subject}" style="width:100%;padding:10px;margin-bottom:10px;">
+                <textarea id="ein2" rows="3" style="width:100%;padding:10px;margin-bottom:10px;">${r.lesson}</textarea>
+                <textarea id="ein3" rows="2" style="width:100%;padding:10px;">${r.notes||''}</textarea>`;
+            document.getElementById('modal').style.display = 'block';
+        }
+		 async function saveEdit() {
+            try {
+                if (ED.type === 'cls') {
+                    const name = document.getElementById('ein').value.trim();
+                    if (!name) return alert('Enter name');
+                    await SB.from('class').update({ class_name: name }).eq('id', ED.id);
+                    CLS.find(c => c.id === ED.id).class_name = name;
+                    loadCls();
+                    notify('✅ Updated');
+                } else if (ED.type === 'std') {
+                    const name = document.getElementById('ein1').value.trim();
+                    const phone = document.getElementById('ein2').value.trim();
+                    if (!name || !phone) return alert('Fill all');
+                    const c = CLS.find(x => x.id == ED.id);
+                    const st = JSON.parse(c.student || '[]');
+                    st[ED.i] = { name, phone };
+                    await saveDB(ED.id, 'student', st);
+                    c.student = JSON.stringify(st);
+                    loadStd();
+                    notify('✅ Updated');
+                } else if (ED.type === 'asgn') {
+                    const title = document.getElementById('ein1').value.trim();
+                    const desc = document.getElementById('ein2').value.trim();
+                    const due = document.getElementById('ein3').value;
+                    if (!title || !due) return alert('Fill required');
+                    const c = CLS.find(x => x.id == ED.cid);
+                    const as = JSON.parse(c.tutes || '[]');
+                    const a = as.find(x => x.id === ED.aid);
+                    a.title = title; a.description = desc; a.dueDate = due;
+                    await saveDB(ED.cid, 'tutes', as);
+                    c.tutes = JSON.stringify(as);
+                    loadAsgn();
+                    notify('✅ Updated');
+                } else if (ED.type === 'daily') {
+                    const sub = document.getElementById('ein1').value.trim();
+                    const less = document.getElementById('ein2').value.trim();
+                    const note = document.getElementById('ein3').value.trim();
+                    if (!sub || !less) return alert('Fill required');
+                    const c = CLS.find(x => x.id == ED.cid);
+                    const dr = JSON.parse(c.d_report || '[]');
+                    const r = dr.find(x => x.id === ED.rid);
+                    r.subject = sub; r.lesson = less; r.notes = note;
+                    await saveDB(ED.cid, 'd_report', dr);
+                    c.d_report = JSON.stringify(dr);
+                    loadDaily();
+                    notify('✅ Updated');
                 }
+                closeMod();
+            } catch (e) {
+                alert('Error: ' + e.message);
             }
         }
         
-        // Update report class select
-        function updateReportClassSelect() {
-            const select = document.getElementById('reportClassSelect');
-            select.innerHTML = '<option value="">All</option>';
-            
-            classes.forEach(cls => {
-                const option = document.createElement('option');
-                option.value = cls.id;
-                option.textContent = cls.name;
-                select.appendChild(option);
-            });
+        function updStats() {
+            const totStd = CLS.reduce((sum, c) => sum + JSON.parse(c.student || '[]').length, 0);
+            const totAsgn = CLS.reduce((sum, c) => sum + JSON.parse(c.tutes || '[]').length, 0);
+            const totRep = CLS.reduce((sum, c) => sum + JSON.parse(c.d_report || '[]').length, 0);
+            document.getElementById('stats').innerHTML = 
+                `<div style="background:#f8f9fa;padding:20px;border-radius:10px;">
+                <h3>Statistics</h3>
+                <p><strong>Classes:</strong> ${CLS.length}</p>
+                <p><strong>Students:</strong> ${totStd}</p>
+                <p><strong>Assignments:</strong> ${totAsgn}</p>
+                <p><strong>Reports:</strong> ${totRep}</p></div>`;
         }
         
-        function updateOverallStats() {
-            document.getElementById('totalClasses').textContent = classes.length;
-            
-            let totalStudentCount = 0;
-            Object.values(students).forEach(classStudents => {
-                totalStudentCount += classStudents.length;
+        function expAll() {
+            let csv = '\ufeffClasses\nName,Students\n';
+            CLS.forEach(c => {
+                const st = JSON.parse(c.student || '[]');
+                csv += `"${c.class_name}",${st.length}\n`;
             });
-            document.getElementById('totalStudents').textContent = totalStudentCount;
-            document.getElementById('totalAssignments').textContent = assignments.length;
+            csv += '\n\nStudents\nClass,Name,Phone\n';
+            CLS.forEach(c => {
+                const st = JSON.parse(c.student || '[]');
+                st.forEach(s => csv += `"${c.class_name}","${s.name}","${s.phone}"\n`);
+            });
+            csv += '\n\nAssignments\nClass,Title,Description,Due\n';
+            CLS.forEach(c => {
+                const as = JSON.parse(c.tutes || '[]');
+                as.forEach(a => csv += `"${c.class_name}","${a.title}","${a.description||''}","${a.dueDate}"\n`);
+            });
+            download(csv, 'All_Data.csv');
         }
         
-        function generateClassReport() {
-            const classId = document.getElementById('reportClassSelect').value;
-            const container = document.getElementById('classReportDetails');
-            
-            if (!classId) {
-                container.innerHTML = '';
-                return;
-            }
-            
-            const cls = classes.find(c => c.id === parseInt(classId));
-            const classStudents = students[classId] || [];
-            const classAssignments = assignments.filter(a => a.classId === parseInt(classId));
-            const classReports = dailyReports.filter(r => r.classId === parseInt(classId));
-            
-            container.innerHTML = `
-                <div class="report-section">
-                    <h3>${cls.name} - Detailed Report</h3>
-                    <p><strong>Teacher:</strong> ${cls.teacher}</p>
-                    <p><strong>Student Count:</strong> ${classStudents.length}</p>
-                    <p><strong>Assignment Count:</strong> ${classAssignments.length}</p>
-                    <p><strong>Daily Report Count:</strong> ${classReports.length}</p>
-                </div>
-            `;
+        function expClass() {
+            let csv = '\ufeffClass Report\nName,Students,Assignments,Reports\n';
+            CLS.forEach(c => {
+                const st = JSON.parse(c.student || '[]').length;
+                const as = JSON.parse(c.tutes || '[]').length;
+                const dr = JSON.parse(c.d_report || '[]').length;
+                csv += `"${c.class_name}",${st},${as},${dr}\n`;
+            });
+            download(csv, 'Class_Report.csv');
         }
         
-        // Excel Export functions
-        function exportToExcel() {
-            let csv = '\ufeff';
-            
-            csv += 'Class Data\n';
-            csv += 'Class Name,Teacher,Student Count\n';
-            classes.forEach(cls => {
-                const studentCount = students[cls.id] ? students[cls.id].length : 0;
-                csv += `"${cls.name}","${cls.teacher}",${studentCount}\n`;
+        function expDaily() {
+            let csv = '\ufeffDaily Reports\nDate,Class,Subject,Lesson,Notes\n';
+            CLS.forEach(c => {
+                const dr = JSON.parse(c.d_report || '[]');
+                dr.forEach(r => csv += `"${r.date}","${c.class_name}","${r.subject}","${r.lesson}","${r.notes||''}"\n`);
             });
-            
-            csv += '\n\n';
-            
-            csv += 'Student Data\n';
-            csv += 'Class Name,Student Name,Phone Number\n';
-            classes.forEach(cls => {
-                const classStudents = students[cls.id] || [];
-                classStudents.forEach(student => {
-                    csv += `"${cls.name}","${student.name}","${student.phone}"\n`;
-                });
-            });
-            
-            csv += '\n\n';
-            
-            csv += 'Assignment Data\n';
-            csv += 'Class Name,Title,Description,Due Date\n';
-            assignments.forEach(assign => {
-                const cls = classes.find(c => c.id === assign.classId);
-                if (cls) {
-                    csv += `"${cls.name}","${assign.title}","${assign.description}","${assign.dueDate}"\n`;
-                }
-            });
-            
-            downloadCSV(csv, 'Complete_Class_Management_Report.csv');
+            download(csv, 'Daily_Reports.csv');
         }
         
-        function exportClassReport() {
-            let csv = '\ufeff';
-            
-            csv += 'Class Report\n';
-            csv += 'Class Name,Teacher,Student Count,Assignment Count,Daily Report Count\n';
-            
-            classes.forEach(cls => {
-                const studentCount = students[cls.id] ? students[cls.id].length : 0;
-                const assignmentCount = assignments.filter(a => a.classId === cls.id).length;
-                const reportCount = dailyReports.filter(r => r.classId === cls.id).length;
-                
-                csv += `"${cls.name}","${cls.teacher}",${studentCount},${assignmentCount},${reportCount}\n`;
-            });
-            
-            downloadCSV(csv, 'Class_Summary_Report.csv');
-        }
-        
-        function exportDailyReports() {
-            let csv = '\ufeff';
-            
-            csv += 'Daily Reports\n';
-            csv += 'Date,Class Name,Subject,Lesson,Notes\n';
-            
-            dailyReports.sort((a, b) => new Date(b.date) - new Date(a.date));
-            
-            dailyReports.forEach(report => {
-                const cls = classes.find(c => c.id === report.classId);
-                if (cls) {
-                    csv += `"${report.date}","${cls.name}","${report.subject}","${report.lesson}","${report.notes}"\n`;
-                }
-            });
-            
-            downloadCSV(csv, 'Daily_Reports.csv');
-        }
-        
-        function downloadCSV(csv, filename) {
+        function download(csv, name) {
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            
-            link.setAttribute('href', url);
-            link.setAttribute('download', filename);
-            link.style.visibility = 'hidden';
-            
-            document.body.appendChild(link);
+            link.href = URL.createObjectURL(blob);
+            link.download = name;
             link.click();
-            document.body.removeChild(link);
-            
-            showNotification('Export Successful', `${filename} file downloaded!`);
+            notify('✅ Exported');
         }
         
-        // Initialize
-        updateDate();
-        loadDataFromDB();
-        
-        setInterval(updateDate, 60000);
-        
-        // Modal Functions
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
+        function closeMod(type) {
+            document.getElementById(type === 'wa' ? 'wamodal' : 'modal').style.display = 'none';
         }
         
-        // Edit class
-        function editClass(id) {
-            const cls = classes.find(c => c.id === id);
-            if (!cls) return;
-            
-            currentEditId = id;
-            document.getElementById('editClassName').value = cls.name;
-            document.getElementById('editClassTeacher').value = cls.teacher;
-            document.getElementById('editClassModal').style.display = 'block';
+        function openWA(phone) {
+            WAP = phone;
+            document.getElementById('wamsg').value = '';
+            document.getElementById('wamodal').style.display = 'block';
         }
         
-        async function saveClassEdit() {
-            const name = document.getElementById('editClassName').value.trim();
-            const teacher = document.getElementById('editClassTeacher').value.trim();
-            
-            if (!name) {
-                alert('Please enter class name');
-                return;
-            }
-            
-            try {
-                const classIndex = classes.findIndex(c => c.id === currentEditId);
-                if (classIndex !== -1) {
-                    classes[classIndex].name = name;
-                    classes[classIndex].teacher = teacher || 'Unknown';
-                    
-                    const { error } = await supabase
-                        .from('class')
-                        .update({
-                            class_name: name,
-                            teacher: teacher || 'Unknown'
-                        })
-                        .eq('id', currentEditId);
-                    
-                    if (error) throw error;
-                    
-                    localStorage.setItem('classes', JSON.stringify(classes));
-                    loadClasses();
-                    closeModal('editClassModal');
-                    showNotification('Success', 'Class updated!');
-                }
-            } catch (error) {
-                alert('Database error: ' + error.message);
-            }
+        function sendWA() {
+            const msg = document.getElementById('wamsg').value.trim();
+            if (!msg) return alert('Type message');
+            let ph = WAP.replace(/[^0-9]/g, '');
+            if (ph.startsWith('0')) ph = '94' + ph.substring(1);
+            else if (!ph.startsWith('94')) ph = '94' + ph;
+            window.open(`https://wa.me/${ph}?text=${encodeURIComponent(msg)}`, '_blank');
+            closeMod('wa');
         }
         
-        // Edit student
-        function editStudent(classId, index) {
-            const student = students[classId][index];
-            if (!student) return;
-            
-            currentEditClassId = classId;
-            currentEditIndex = index;
-            document.getElementById('editStudentName').value = student.name;
-            document.getElementById('editStudentPhone').value = student.phone;
-            document.getElementById('editStudentModal').style.display = 'block';
+        function copyTxt(txt) {
+            navigator.clipboard.writeText(txt);
+            notify('✅ Copied');
         }
         
-        async function saveStudentEdit() {
-            const name = document.getElementById('editStudentName').value.trim();
-            const phone = document.getElementById('editStudentPhone').value.trim();
-            
-            if (!name || !phone) {
-                alert('Please fill all information');
-                return;
-            }
-            
-            try {
-                students[currentEditClassId][currentEditIndex].name = name;
-                students[currentEditClassId][currentEditIndex].phone = phone;
-                
-                await updateClassInDB(currentEditClassId, 'student', students[currentEditClassId]);
-                
-                localStorage.setItem('students', JSON.stringify(students));
-                loadStudents();
-                closeModal('editStudentModal');
-                showNotification('Success', 'Student updated!');
-            } catch (error) {
-                alert('Database error: ' + error.message);
-            }
-        }
+        window.onclick = e => {
+            if (e.target.id === 'modal') closeMod();
+            if (e.target.id === 'wamodal') closeMod('wa');
+        };
         
-        // Edit assignment
-        function editAssignment(id) {
-            const assign = assignments.find(a => a.id === id);
-            if (!assign) return;
-            
-            currentEditId = id;
-            document.getElementById('editAssignmentTitle').value = assign.title;
-            document.getElementById('editAssignmentDesc').value = assign.description || '';
-            document.getElementById('editAssignmentDue').value = assign.dueDate;
-            document.getElementById('editAssignmentModal').style.display = 'block';
-        }
+        document.getElementById('date').textContent = new Date().toLocaleDateString('en-US', { 
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+        });
         
-        async function saveAssignmentEdit() {
-            const title = document.getElementById('editAssignmentTitle').value.trim();
-            const desc = document.getElementById('editAssignmentDesc').value.trim();
-            const due = document.getElementById('editAssignmentDue').value;
-            
-            if (!title || !due) {
-                alert('Please fill title and due date');
-                return;
-            }
-            
-            try {
-                const assignIndex = assignments.findIndex(a => a.id === currentEditId);
-                if (assignIndex !== -1) {
-                    assignments[assignIndex].title = title;
-                    assignments[assignIndex].description = desc;
-                    assignments[assignIndex].dueDate = due;
-                    
-                    const classId = assignments[assignIndex].classId;
-                    const classAssignments = assignments.filter(a => a.classId === classId);
-                    await updateClassInDB(classId, 'tutes', classAssignments);
-                    
-                    localStorage.setItem('assignments', JSON.stringify(assignments));
-                    loadAssignments();
-                    closeModal('editAssignmentModal');
-                    showNotification('Success', 'Assignment updated!');
-                }
-            } catch (error) {
-                alert('Database error: ' + error.message);
-            }
-        }
-        
-        // Edit daily report
-        function editDailyReport(id) {
-            const report = dailyReports.find(r => r.id === id);
-            if (!report) return;
-            
-            currentEditId = id;
-            document.getElementById('editReportSubject').value = report.subject;
-            document.getElementById('editReportLesson').value = report.lesson;
-            document.getElementById('editReportNotes').value = report.notes || '';
-            document.getElementById('editDailyReportModal').style.display = 'block';
-        }
-        
-        async function saveDailyReportEdit() {
-            const subject = document.getElementById('editReportSubject').value.trim();
-            const lesson = document.getElementById('editReportLesson').value.trim();
-            const notes = document.getElementById('editReportNotes').value.trim();
-            
-            if (!subject || !lesson) {
-                alert('Please fill subject and lesson');
-                return;
-            }
-            
-            try {
-                const reportIndex = dailyReports.findIndex(r => r.id === currentEditId);
-                if (reportIndex !== -1) {
-                    dailyReports[reportIndex].subject = subject;
-                    dailyReports[reportIndex].lesson = lesson;
-                    dailyReports[reportIndex].notes = notes;
-                    
-                    const classId = dailyReports[reportIndex].classId;
-                    const classReports = dailyReports.filter(r => r.classId === classId);
-                    await updateClassInDB(classId, 'd_report', classReports);
-                    
-                    localStorage.setItem('dailyReports', JSON.stringify(dailyReports));
-                    loadTodayReports();
-                    closeModal('editDailyReportModal');
-                    showNotification('Success', 'Report updated!');
-                }
-            } catch (error) {
-                alert('Database error: ' + error.message);
-            }
-        }
-        
-        // WhatsApp Functions
-        function openWhatsApp(phone) {
-            currentWhatsAppPhone = phone;
-            document.getElementById('whatsappMessage').value = '';
-            document.getElementById('whatsappModal').style.display = 'block';
-        }
-        
-        function sendWhatsApp() {
-            const message = document.getElementById('whatsappMessage').value.trim();
-            
-            if (!message) {
-                alert('Please type a message');
-                return;
-            }
-            
-            let phone = currentWhatsAppPhone.replace(/[^0-9]/g, '');
-            
-            if (phone.startsWith('0')) {
-                phone = '94' + phone.substring(1);
-            } else if (!phone.startsWith('94')) {
-                phone = '94' + phone;
-            }
-            
-            const encodedMessage = encodeURIComponent(message);
-            const whatsappUrl = `https://wa.me/${phone}?text=${encodedMessage}`;
-            
-            window.open(whatsappUrl, '_blank');
-            closeModal('whatsappModal');
-        }
-        
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            if (event.target.classList.contains('modal')) {
-                event.target.style.display = 'none';
-            }
-        }
+        loadDB();
+        loadAsgn();
+        loadDaily();
     </script>
 </body>
 </html>
